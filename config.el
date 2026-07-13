@@ -48,6 +48,7 @@
 (map! :map c-mode-map "<f6>" (cmd! (compile "make imgui")))
 
 (map! :g "C-," #'+evil/next-frame)
+(map! :nvi "C-w" #'kill-current-buffer)
 (map! :nvi "<C-tab>" #'centaur-tabs-forward)
 (map! :nvi "<C-iso-lefttab>" #'centaur-tabs-backward)
 
