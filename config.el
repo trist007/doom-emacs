@@ -61,8 +61,21 @@
 (setq org-src-fontify-natively t)
 (setq org-src-tab-acts-natively t)
 
-(after! eglot
-  (setq-default eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider)))
+(add-hook! '(c-mode-hook c++-mode-hook) :append
+  (defun +my/allman-braces ()
+    ;; Open brace on its own line, for if/for/while/functions/etc.
+    (c-set-offset 'substatement-open 0)
+    (c-set-offset 'inline-open 0)
+    (c-set-offset 'block-open 0)
+    (c-set-offset 'brace-list-open 0)
+    (setq c-hanging-braces-alist
+          '((substatement-open before after)
+            (brace-list-open before after)
+            (block-open before after)
+            (defun-open before after)
+            (class-open before after)
+            (inline-open before after)))
+    (setq c-basic-offset 4)))
 
 ;; dape
 (after! dape
@@ -82,13 +95,6 @@
 ;; multicursor
 (after! evil-mc
   (global-evil-mc-mode 1))
-
-(after! cc-mode
-  (setq c-basic-offset 4)
-  ;; Override the syntactic offset for brace structures specifically
-  (c-set-offset 'substatement-open 4)
-  (c-set-offset 'brace-list-open 4)
-  (c-set-offset 'block-open 4))
 
 ;; which-func-mode
 (which-function-mode 1)
