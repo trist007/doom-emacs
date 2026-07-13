@@ -46,6 +46,7 @@
 (map! :map c-mode-map "<f4>" (cmd! (compile "make engine")))
 (map! :map c-mode-map "<f5>" (cmd! (compile "make")))
 (map! :map c-mode-map "<f6>" (cmd! (compile "make imgui")))
+(map! :map c-mode-map "<f12>" #'+lookup/definition)
 
 (map! :g "C-," #'+evil/next-frame)
 (map! :nvi "C-w" #'kill-current-buffer)
