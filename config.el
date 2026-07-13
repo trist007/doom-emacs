@@ -61,6 +61,9 @@
 (setq org-src-fontify-natively t)
 (setq org-src-tab-acts-natively t)
 
+(after! eglot
+  (setq-default eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider)))
+
 ;; dape
 (after! dape
   (add-to-list 'dape-configs
@@ -79,6 +82,16 @@
 ;; multicursor
 (after! evil-mc
   (global-evil-mc-mode 1))
+
+(after! cc-mode
+  (setq c-basic-offset 4)
+  ;; Override the syntactic offset for brace structures specifically
+  (c-set-offset 'substatement-open 4)
+  (c-set-offset 'brace-list-open 4)
+  (c-set-offset 'block-open 4))
+
+;; which-func-mode
+(which-function-mode 1)
 
 ;; Base org directory
 (setq org-directory "~/org/")
