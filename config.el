@@ -88,6 +88,15 @@
 (global-set-key (kbd "C-,") #'other-frame) ; vanilla equiv. of +evil/next-frame
 (global-set-key (kbd "C-c c") #'org-capture)
 
+(map! :n "C-<tab>" #'centaur-tabs-forward
+      :n "C-S-<tab>" #'centaur-tabs-backward)
+
+(setq-default tab-width 2
+              indent-tabs-mode nil)  ;; nil = spaces, not literal tabs
+
+(map! :map (c-mode-map c++-mode-map)
+      :n "C-a" #'align)
+
 (with-eval-after-load 'evil
   ;; evil :nvi bindings (normal/visual/insert states)
         (evil-define-key '(normal visual) 'global (kbd "C-w") #'kill-current-buffer))
@@ -118,25 +127,29 @@
   (define-key c-mode-map (kbd "<f5>")  (lambda () (interactive) (compile "build")))
   (define-key c-mode-map (kbd "<f6>")  (lambda () (interactive) (compile "build imgui")))
   ;; vanilla equivalent of Doom's +lookup/definition (uses eglot's xref backend)
-  (define-key c-mode-map (kbd "<f12>") #'xref-find-definitions))
-        )
+  (define-key c-mode-map (kbd "<f12>") #'xref-find-definitions)))
 
 ;;; -- centaur-tabs: group tabs by perspective, so each frame
 ;;;    (which gets its own perspective via after-make-frame-functions
 ;;;    in init.el) only shows its own buffers, not other frames' -------
+;;;
 (with-eval-after-load 'centaur-tabs
+  (centaur-tabs-mode 1)
   (defun +my/centaur-tabs-buffer-groups ()
     "Group tabs by the current perspective's name."
-    (list (persp-current-name)))
-
+    (list (safe-persp-name (get-current-persp))))
   (setq centaur-tabs-buffer-groups-function #'+my/centaur-tabs-buffer-groups))
+
+(with-eval-after-load 'persp-mode
+  (add-hook 'persp-activated-hook
+            (lambda (&rest _) (centaur-tabs-headline-match))));;
 
 ;; Perspective doesn't know centaur-tabs exists, so force it to
 ;; recompute its tab set whenever you switch frames/perspectives --
 ;; otherwise the tab bar lags a frame behind until you touch a buffer.
-(with-eval-after-load 'perspective
-  (add-hook 'persp-activated-functions
-            (lambda (&rest _) (centaur-tabs-headline-match))))
+;;(with-eval-after-load 'perspective
+;;  (add-hook 'persp-activated-functions
+;;            (lambda (&rest _) (centaur-tabs-headline-match))))
 
 ;;; -- dape: wing-debug launch config --------------------------------------
 ;; NOTE: your original config uses lldb-dap. It ships with LLVM on
