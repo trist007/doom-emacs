@@ -33,138 +33,15 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-one)
-<<<<<<< HEAD
-=======
-;;(setq doom-font (font-spec :family "Liberation Mono" :size 17))
-(setq doom-font (font-spec :family "Iosevka" :size 22))
-
-(after! neotree
-  (setq neo-theme 'nerd-icons))
-
-;; Keybindings
-(map! "M-m" (lambda () (interactive) (compile "make game")))
-(map! :map c-mode-map "<f1>" (cmd! (compile "make clean")))
-(map! :map c-mode-map "<f2>" (cmd! (compile "make run")))
-(map! :map c-mode-map "<f4>" (cmd! (compile "make engine")))
-(map! :map c-mode-map "<f5>" (cmd! (compile "make")))
-(map! :map c-mode-map "<f6>" (cmd! (compile "make imgui")))
-(map! :map c-mode-map "<f12>" #'+lookup/definition)
-
-(map! :g "C-," #'+evil/next-frame)
-(map! :nvi "C-w" #'kill-current-buffer)
-(map! :nvi "<C-tab>" #'centaur-tabs-forward)
-(map! :nvi "<C-iso-lefttab>" #'centaur-tabs-backward)
->>>>>>> 5090802ba050b2a0e32f7ca81e61b3ad5b2ea908
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
 
-<<<<<<< HEAD
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "C:/dev/org/")
 
-
-=======
-;; Syntax highlighting for code blocks (C, GLSL, HLSL, etc.)
-(setq org-src-fontify-natively t)
-(setq org-src-tab-acts-natively t)
-
-(add-hook! '(c-mode-hook c++-mode-hook) :append
-  (defun +my/allman-braces ()
-    ;; Open brace on its own line, for if/for/while/functions/etc.
-    (c-set-offset 'substatement-open 0)
-    (c-set-offset 'inline-open 0)
-    (c-set-offset 'block-open 0)
-    (c-set-offset 'brace-list-open 0)
-    (setq c-hanging-braces-alist
-          '((substatement-open before after)
-            (brace-list-open before after)
-            (block-open before after)
-            (defun-open before after)
-            (class-open before after)
-            (inline-open before after)))
-    (setq c-basic-offset 4)))
-
-;; dape
-(after! dape
-  (add-to-list 'dape-configs
-    `(wing-debug
-      modes (c-mode c++-mode)
-      command "lldb-dap"
-      command-cwd dape-cwd-function
-      :type "lldb"
-      :request "launch"
-      :name "Debug wing"
-      :program "/home/trist007/dev/wing/wing/bin/wing"
-      :cwd "/home/trist007/dev/wing/wing/code"
-      :args []
-      :stopOnEntry nil)))
-
-;; multicursor
-(after! evil-mc
-  (global-evil-mc-mode 1))
-
-;; which-func-mode
-(which-function-mode 1)
-
-;; Base org directory
-(setq org-directory "~/org/")
-
-;; Make gamedev files easy to jump to
-(defvar gamedev-dir (concat org-directory "gamedev/"))
-
-;; Capture templates: quick-add notes into the right file without
-;; manually opening it first
-(after! org
-  (setq org-capture-templates
-        `(("g" "Gamedev note...")  ; parent menu, no template of its own
-
-          ("ge" "DoomEmacs note" entry
-           (file+headline ,(concat gamedev-dir "doomemacs.org") "Inbox")
-           "* %?\n%U\n%a\n")
-
-          ("gb" "Blender note" entry
-           (file+headline ,(concat gamedev-dir "blender.org") "Inbox")
-           "* %?\n%U\n%a\n")
-
-          ("gc" "Collision note" entry
-           (file+headline ,(concat gamedev-dir "collision.org") "Inbox")
-           "* %?\n%U\n%a\n")
-
-          ("gs" "Shader note" entry
-           (file+headline ,(concat gamedev-dir "shaders.org") "Inbox")
-           "* %?\n%U\n%a\n")
-
-          ("gv" "Vulkan note" entry
-           (file+headline ,(concat gamedev-dir "vulkan.org") "Inbox")
-           "* %?\n%U\n%a\n")
-
-          ("gd" "D3D11 note" entry
-           (file+headline ,(concat gamedev-dir "d3d11.org") "Inbox")
-           "* %?\n%U\n%a\n")
-
-          ("gm" "Math note" entry
-           (file+headline ,(concat gamedev-dir "math.org") "Inbox")
-           "* %?\n%U\n%a\n")
-
-          ("gg" "Gotcha" entry
-           (file+headline ,(concat gamedev-dir "gotchas.org") "Inbox")
-           "* %?\n%U\n%a\n"))))
-
-;; RSS feeds
-(setq elfeed-feeds
-      '("https://www.youtube.com/feeds/videos.xml?channel_id=UCaTznQhurW5AaiYPbhEA-KA"
-        "https://www.youtube.com/feeds/videos.xml?channel_id=UCLRILFZ-sHKYZ8io_IP5_ag"
-        "https://www.youtube.com/feeds/videos.xml?channel_id=UC9J9u3apteD0EuFjzRpt71w"
-        "https://www.youtube.com/feeds/videos.xml?channel_id=UCc6-nJ-sW4ZEH3bTOMDHsaQ"
-        "https://www.youtube.com/feeds/videos.xml?channel_id=UC8biKfVSZgnwKQiK24ltiEw"
-        "https://www.youtube.com/feeds/videos.xml?channel_id=UChXKAI83IuqSneWe92F97jQ"))
-
-(map! :leader
-      :desc "elfeed" "o y" #'elfeed)
->>>>>>> 5090802ba050b2a0e32f7ca81e61b3ad5b2ea908
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `with-eval-after-load' block, otherwise Doom's defaults may override your
 ;; settings. E.g.
@@ -195,7 +72,6 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
-<<<<<<< HEAD
 (setq magit-git-executable "C:/Program Files/Git/bin/git.exe")
 
 (set-face-attribute 'default nil :family "Iosevka" :height 220) ; height is 1/10 pt
@@ -356,5 +232,3 @@
 ;;(remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-pushremote)
 ;;(remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-pushremote)
 (remove-hook 'dired-mode-hook #'dired-omit-mode)
-=======
->>>>>>> 5090802ba050b2a0e32f7ca81e61b3ad5b2ea908
