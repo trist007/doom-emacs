@@ -74,6 +74,43 @@
 ;; they are implemented.
 (setq magit-git-executable "C:/Program Files/Git/bin/git.exe")
 
+(defun my/load-vcvars (&optional arch)
+  "Load MSVC environment variables into Emacs's process-environment."
+  (interactive)
+  (let* ((arch (or arch "x64"))
+         (vcvarsall "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat")
+         (cmd (format "\"%s\" %s && set" vcvarsall arch))
+         (output (shell-command-to-string (format "cmd.exe /c \"%s\"" cmd))))
+    (dolist (line (split-string output "\n"))
+      (when (string-match "^\\([A-Za-z_][A-Za-z0-9_]*\\)=\\(.*\\)$" line)
+        (let ((var (match-string 1 line))
+              (val (string-trim (match-string 2 line))))
+          (setenv var val)
+          (when (string-equal (upcase var) "PATH")
+            (setq exec-path (append (split-string val ";") exec-path))))))
+    (message "MSVC environment loaded (%s)" arch)))
+
+;; run it once, automatically, at startup:
+(my/load-vcvars)
+
+(defun my/move-line-up ()
+  "Move the current line up one line."
+  (interactive)
+  (transpose-lines 1)
+  (forward-line -2))
+
+(map! "M-k" #'my/move-line-up)
+
+(defun my/move-line-down ()
+  "Move the current line down one line."
+  (interactive)
+  (forward-line 1)
+  (transpose-lines 1)
+  (forward-line -1))
+
+(map! "M-j" #'my/move-line-down)
+
+
 (set-face-attribute 'default nil :family "Iosevka" :height 220) ; height is 1/10 pt
 
 ;;; -- Line numbers (Doom's `display-line-numbers-type t') ----------------
@@ -83,7 +120,6 @@
 (which-function-mode 1)
 
 ;;; -- Global keybindings --------------------------------------------------
-(global-set-key (kbd "M-m") (lambda () (interactive) (compile "make game")))
 (global-set-key (kbd "C-,") #'other-frame) ; vanilla equiv. of +evil/next-frame
 (global-set-key (kbd "C-c c") #'org-capture)
 
@@ -120,11 +156,15 @@
 
 (with-eval-after-load 'cc-mode
   (dolist (map (list c-mode-map c++-mode-map))
-  (define-key c-mode-map (kbd "<f1>")  (lambda () (interactive) (compile "build clean")))
-  (define-key c-mode-map (kbd "<f2>")  (lambda () (interactive) (compile "build run")))
+  (define-key c-mode-map (kbd "M-m")   (lambda () (interactive) (compile "build game")))
+  (define-key c-mode-map (kbd "M-M")   (lambda () (interactive) (compile "build game2")))
+  (define-key c-mode-map (kbd "<f1>")  (lambda () (interactive) (compile "clean")))
+  (define-key c-mode-map (kbd "<f2>")  (lambda () (interactive) (compile "run")))
   (define-key c-mode-map (kbd "<f4>")  (lambda () (interactive) (compile "build engine")))
-  (define-key c-mode-map (kbd "<f5>")  (lambda () (interactive) (compile "build")))
+  (define-key c-mode-map (kbd "<S-f4>")(lambda () (interactive) (compile "build engine2")))
+  (define-key c-mode-map (kbd "<f5>")  (lambda () (interactive) (compile "build main")))
   (define-key c-mode-map (kbd "<f6>")  (lambda () (interactive) (compile "build imgui")))
+  (define-key c-mode-map (kbd "<S-f6>")(lambda () (interactive) (compile "build imgui2")))
   ;; vanilla equivalent of Doom's +lookup/definition (uses eglot's xref backend)
   (define-key c-mode-map (kbd "<f12>") #'xref-find-definitions)))
 
@@ -215,6 +255,9 @@
           ("gm" "Math note" entry
            (file+headline ,(concat gamedev-dir "math.org") "Inbox")
            "* %?\n%U\n%a\n")
+          ("go" "Org note" entry
+           (file+headline ,(concat gamedev-dir "orgmode.org") "Inbox")
+           "* %?\n%U\n%a\n")
           ("g+" "C/C++ note" entry
            (file+headline ,(concat gamedev-dir "c.org") "Inbox")
            "* %?\n%U\n%a\n")
@@ -232,3 +275,8 @@
 ;;(remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-pushremote)
 ;;(remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-pushremote)
 (remove-hook 'dired-mode-hook #'dired-omit-mode)
+
+(use-package! djvu)
+
+(use-package! org-noter
+  :after djvu)
