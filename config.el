@@ -32,7 +32,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'doom-tokyo-night)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -74,24 +74,50 @@
 ;; they are implemented.
 (setq magit-git-executable "C:/Program Files/Git/bin/git.exe")
 
-(defun my/load-vcvars (&optional arch)
-  "Load MSVC environment variables into Emacs's process-environment."
-  (interactive)
-  (let* ((arch (or arch "x64"))
-         (vcvarsall "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat")
-         (cmd (format "\"%s\" %s && set" vcvarsall arch))
-         (output (shell-command-to-string (format "cmd.exe /c \"%s\"" cmd))))
-    (dolist (line (split-string output "\n"))
-      (when (string-match "^\\([A-Za-z_][A-Za-z0-9_]*\\)=\\(.*\\)$" line)
-        (let ((var (match-string 1 line))
-              (val (string-trim (match-string 2 line))))
-          (setenv var val)
-          (when (string-equal (upcase var) "PATH")
-            (setq exec-path (append (split-string val ";") exec-path))))))
-    (message "MSVC environment loaded (%s)" arch)))
+;; Define your favorite themes here
+(defvar my-favorite-themes '(doom-one
+                             doom-dracula
+                             doom-Iosvkem
+                             doom-palenight
+                             doom-tokyo-night
+                             doom-wilmersdorf
+                             doom-outrun-electric
+                             doom-winter-is-coming-dark-blue)
+  "List of my favorite themes to choose from.")
 
-;; run it once, automatically, at startup:
-(my/load-vcvars)
+;; Create a command to choose only from your favorites
+;;(defun my/choose-favorite-theme ()
+;;  "Read a theme from my-favorite-themes and load it."
+;;  (interactive)
+;;  (let ((chosen-theme (completing-read "Load favorite theme: " my-favorite-themes)))
+;;    (when chosen-theme
+;;      (setq doom-theme (intern chosen-theme))
+;;      (load-theme (intern chosen-theme) t))))
+;;
+;;
+(defun my/choose-favorite-theme ()
+  "Read and instantly preview a theme from my-favorite-themes."
+  (interactive)
+  (let ((original-theme doom-theme)
+        (chosen-theme nil))
+    (unwind-protect
+        (progn
+          (setq chosen-theme
+                (completing-read
+                 "Preview favorite theme: "
+                 my-favorite-themes
+                 nil t nil nil nil nil))
+          (when chosen-theme
+            (setq doom-theme (intern chosen-theme))
+            (load-theme (intern chosen-theme) t)))
+      ;; If the user hits ESC / aborts, revert back to the original theme
+      (unless chosen-theme
+        (setq doom-theme original-theme)
+        (load-theme original-theme t)))))
+
+;; Bind the command to a convenient shortcut (e.g., SPC h T)
+(map! :leader
+      :desc "Load favorite theme" "h T" #'my/choose-favorite-theme)
 
 (defun my/move-line-up ()
   "Move the current line up one line."
@@ -280,3 +306,22 @@
 
 (use-package! org-noter
   :after djvu)
+
+(defun my/load-vcvars (&optional arch)
+  "Load MSVC environment variables into Emacs's process-environment."
+  (interactive)
+  (let* ((arch (or arch "x64"))
+         (vcvarsall "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat")
+         (cmd (format "\"%s\" %s && set" vcvarsall arch))
+         (output (shell-command-to-string (format "cmd.exe /c \"%s\"" cmd))))
+    (dolist (line (split-string output "\n"))
+      (when (string-match "^\\([A-Za-z_][A-Za-z0-9_]*\\)=\\(.*\\)$" line)
+        (let ((var (match-string 1 line))
+              (val (string-trim (match-string 2 line))))
+          (setenv var val)
+          (when (string-equal (upcase var) "PATH")
+            (setq exec-path (append (split-string val ";") exec-path))))))
+    (message "MSVC environment loaded (%s)" arch)))
+
+;; run it once, automatically, at startup:
+(my/load-vcvars)
