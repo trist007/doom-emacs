@@ -72,8 +72,38 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
-(setq magit-git-executable "C:/Program Files/Git/bin/git.exe")
+(defvar my/original-path (getenv "PATH")
+  "PATH captured once at Emacs startup, before any vcvars loading.")
+(defvar my/original-exec-path exec-path
+  "exec-path captured once at Emacs startup, before any vcvars loading.")
+(setq vc-handled-backends nil)
+;;(defun my/load-vcvars (&optional arch)
+;;  "Load MSVC environment variables into Emacs's process-environment.
+;;Always starts from the original PATH/exec-path to avoid duplicate accumulation."
+;;  (interactive)
+;;  (let* ((arch (or arch "x64"))
+;;         (vcvarsall "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat")
+;;         (cmd (format "\"%s\" %s && set" vcvarsall arch))
+;;         (output (shell-command-to-string (format "cmd.exe /c \"%s\"" cmd))))
+;;    ;; Reset to baseline before applying vcvars, so repeated calls don't stack
+;;    (setenv "PATH" my/original-path)
+;;    (setq exec-path my/original-exec-path)
+;;    (dolist (line (split-string output "\n"))
+;;      (when (string-match "^\\([A-Za-z_][A-Za-z0-9_]*\\)=\\(.*\\)$" line)
+;;        (let ((var (match-string 1 line))
+;;              (val (string-trim (match-string 2 line))))
+;;          (if (string-equal (upcase var) "PATH")
+;;              (progn
+;;                (setenv "PATH" (concat val ";" my/original-path))
+;;                (setq exec-path (append (split-string val ";") my/original-exec-path)))
+;;            (setenv var val)))))
+;;    (message "MSVC environment loaded (%s)" arch)))
 
+(setq magit-git-executable "C:/Program Files/Git/bin/git.exe")
+(setq magit-refresh-status-buffer nil) ; if you don't need status auto-refreshed constantly
+(setq magit-diff-refine-hunk nil) ; word-level diff highlighting is expensive; nil disables, 'all enables everywhere
+
+;;(add-to-list 'exec-path "C:/raddbg")
 ;; Define your favorite themes here
 (defvar my-favorite-themes '(doom-one
                              doom-dracula
@@ -192,7 +222,25 @@
   (define-key c-mode-map (kbd "M-m")   (lambda () (interactive) (compile "build game")))
   (define-key c-mode-map (kbd "M-M")   (lambda () (interactive) (compile "build game2")))
   (define-key c-mode-map (kbd "<f1>")  (lambda () (interactive) (compile "clean")))
-  (define-key c-mode-map (kbd "<f2>")  (lambda () (interactive) (compile "run")))
+
+;;  (define-key c-mode-map (kbd "<f2>")  (lambda () (interactive) (compile "run")))
+;;
+;;  (define-key c-mode-map (kbd "<f3>")
+;;    (lambda () (interactive)
+;;      (let ((default-directory "C:/dev/wing/wing/code"))
+;;        (compilation-start "debug.bat" t))))
+;;
+;;
+    (define-key c-mode-map (kbd "<f2>")
+    (lambda () (interactive)
+        (let ((default-directory "C:/dev/wing/wing/bin/"))
+        (compilation-start "C:/dev/wing/wing/code/run.bat vulkan" t))))
+
+    (define-key c-mode-map (kbd "<f3>")
+    (lambda () (interactive)
+        (let ((default-directory "C:/dev/wing/wing/bin/"))
+        (compilation-start "C:/dev/wing/wing/code/debug.bat" t))))
+
   (define-key c-mode-map (kbd "<f4>")  (lambda () (interactive) (compile "build engine")))
   (define-key c-mode-map (kbd "<S-f4>")(lambda () (interactive) (compile "build engine2")))
   (define-key c-mode-map (kbd "<f5>")  (lambda () (interactive) (compile "build main")))
@@ -314,24 +362,6 @@
 (use-package! org-noter
   :after djvu)
 
-(defun my/load-vcvars (&optional arch)
-  "Load MSVC environment variables into Emacs's process-environment."
-  (interactive)
-  (let* ((arch (or arch "x64"))
-         (vcvarsall "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat")
-         (cmd (format "\"%s\" %s && set" vcvarsall arch))
-         (output (shell-command-to-string (format "cmd.exe /c \"%s\"" cmd))))
-    (dolist (line (split-string output "\n"))
-      (when (string-match "^\\([A-Za-z_][A-Za-z0-9_]*\\)=\\(.*\\)$" line)
-        (let ((var (match-string 1 line))
-              (val (string-trim (match-string 2 line))))
-          (setenv var val)
-          (when (string-equal (upcase var) "PATH")
-            (setq exec-path (append (split-string val ";") exec-path))))))
-    (message "MSVC environment loaded (%s)" arch)))
-
-;; run it once, automatically, at startup:
-(my/load-vcvars)
 
 ;;(setq auth-sources '("~/.authinfo.gpg"))
 ;;
@@ -388,4 +418,3 @@
 
 (map! "M-y" #'+trist/insert-note-comment)
 (map! "M-t" #'+trist/insert-todo-comment)
-
