@@ -119,6 +119,13 @@
 (map! :leader
       :desc "Load favorite theme" "h T" #'my/choose-favorite-theme)
 
+(setq epg-gpg-program "C:/msys64/usr/bin/gpg.exe")
+
+(after! emms
+  (require 'emms-player-mpv)
+  (add-to-list 'emms-player-list 'emms-player-mpv)
+  (setq emms-player-mpv-executable "C:/ProgramData/chocolatey/lib/mpvio.install/tools/mpv.exe"))
+
 (defun my/move-line-up ()
   "Move the current line up one line."
   (interactive)
@@ -325,3 +332,60 @@
 
 ;; run it once, automatically, at startup:
 (my/load-vcvars)
+
+;;(setq auth-sources '("~/.authinfo.gpg"))
+;;
+;;(after! circe
+;;  (set-irc-server! "irc.us.libera.chat"
+;;    `(:tls t
+;;      :port 6697
+;;      :nick "trist007"
+;;      :sasl-username "trist007"
+;;      :sasl-password
+;;      (lambda (&rest _)
+;;        (let ((match (car (auth-source-search :host "irc.us.libera.chat"))))
+;;          (if match
+;;              (let ((secret (plist-get match :secret)))
+;;                (if (functionp secret) (funcall secret) secret))
+;;            (error "No auth-source entry for irc.us.libera.chat"))))
+;;      :channels ("##c" "##asm"))))
+;;      
+(setq fixme-modes '(c++-mode c-mode asm-mode emacs-lisp-mode))
+(make-face 'font-lock-fixme-face)
+(make-face 'font-lock-study-face)
+(make-face 'font-lock-important-face)
+(make-face 'font-lock-note-face)
+(mapc (lambda (mode)
+        (font-lock-add-keywords
+         mode
+         '(("\\<\\(TODO\\)" 1 'font-lock-fixme-face t)
+           ("\\<\\(StUDY\\)" 1 'font-lock-study-face t)
+           ("\\<\\(IMPORTANT\\)" 1 'font-lock-important-face t)
+           ("\\<\\(NOTE\\)" 1 'font-lock-note-face t))))
+      fixme-modes)
+(modify-face 'font-lock-fixme-face "Yellow" nil nil t nil t nil nil)
+(modify-face 'font-lock-study-face "Yellow" nil nil t nil t nil nil)
+(modify-face 'font-lock-important-face "Yellow" nil nil t nil t nil nil)
+(modify-face 'font-lock-note-face "Red" nil nil t nil t nil nil)
+
+(after! hl-todo
+  (setq hl-todo-keyword-faces
+        (cons '("NOTE" . "Red")
+              (assoc-delete-all "NOTE" (assoc-delete-all "TODO" hl-todo-keyword-faces)))))
+
+;; Insert "// NOTE(trist007): " at point
+(defun +trist/insert-note-comment ()
+  "Insert a comment-syntax-aware NOTE tag."
+  (interactive)
+  (insert "// NOTE(trist007): "))
+  ;; (insert (concat (string-trim-right comment-start) " NOTE(trist007): ")))
+
+(defun +trist/insert-todo-comment ()
+  "Insert a comment-syntax-aware TODO tag."
+  (interactive)
+  ;; (insert (concat (string-trim-right comment-start) " TODO(trist007): ")))
+  (insert "// TODO(trist007): "))
+
+(map! "M-y" #'+trist/insert-note-comment)
+(map! "M-t" #'+trist/insert-todo-comment)
+
