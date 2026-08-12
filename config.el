@@ -76,31 +76,33 @@
   "PATH captured once at Emacs startup, before any vcvars loading.")
 (defvar my/original-exec-path exec-path
   "exec-path captured once at Emacs startup, before any vcvars loading.")
+
 (setq vc-handled-backends nil)
-;;(defun my/load-vcvars (&optional arch)
-;;  "Load MSVC environment variables into Emacs's process-environment.
-;;Always starts from the original PATH/exec-path to avoid duplicate accumulation."
-;;  (interactive)
-;;  (let* ((arch (or arch "x64"))
-;;         (vcvarsall "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat")
-;;         (cmd (format "\"%s\" %s && set" vcvarsall arch))
-;;         (output (shell-command-to-string (format "cmd.exe /c \"%s\"" cmd))))
-;;    ;; Reset to baseline before applying vcvars, so repeated calls don't stack
-;;    (setenv "PATH" my/original-path)
-;;    (setq exec-path my/original-exec-path)
-;;    (dolist (line (split-string output "\n"))
-;;      (when (string-match "^\\([A-Za-z_][A-Za-z0-9_]*\\)=\\(.*\\)$" line)
-;;        (let ((var (match-string 1 line))
-;;              (val (string-trim (match-string 2 line))))
-;;          (if (string-equal (upcase var) "PATH")
-;;              (progn
-;;                (setenv "PATH" (concat val ";" my/original-path))
-;;                (setq exec-path (append (split-string val ";") my/original-exec-path)))
-;;            (setenv var val)))))
-;;    (message "MSVC environment loaded (%s)" arch)))
+
+(defun my/load-vcvars (&optional arch)
+  "Load MSVC environment variables into Emacs's process-environment.
+Always starts from the original PATH/exec-path to avoid duplicate accumulation."
+  (interactive)
+  (let* ((arch (or arch "x64"))
+         (vcvarsall "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat")
+         (cmd (format "\"%s\" %s && set" vcvarsall arch))
+         (output (shell-command-to-string (format "cmd.exe /c \"%s\"" cmd))))
+    ;; Reset to baseline before applying vcvars, so repeated calls don't stack
+    (setenv "PATH" my/original-path)
+    (setq exec-path my/original-exec-path)
+    (dolist (line (split-string output "\n"))
+      (when (string-match "^\\([A-Za-z_][A-Za-z0-9_]*\\)=\\(.*\\)$" line)
+        (let ((var (match-string 1 line))
+              (val (string-trim (match-string 2 line))))
+          (if (string-equal (upcase var) "PATH")
+              (progn
+                (setenv "PATH" (concat val ";" my/original-path))
+                (setq exec-path (append (split-string val ";") my/original-exec-path)))
+            (setenv var val)))))
+    (message "MSVC environment loaded (%s)" arch)))
 
 (setq magit-git-executable "C:/Program Files/Git/bin/git.exe")
-(setq magit-refresh-status-buffer nil) ; if you don't need status auto-refreshed constantly
+(setq magit-refresh-status-buffer t) ; if you don't need status auto-refreshed constantly
 (setq magit-diff-refine-hunk nil) ; word-level diff highlighting is expensive; nil disables, 'all enables everywhere
 
 ;;(add-to-list 'exec-path "C:/raddbg")
@@ -199,7 +201,7 @@
   ;; evil :nvi bindings (normal/visual/insert states)
         (evil-define-key '(normal visual) 'global (kbd "C-w") #'kill-current-buffer))
 
-;;; -- C/C++: Allman braces + per-project compile keys ---------------------
+;;; -- C/C++: Allman braces + per-project my/wing-compile keys ---------------------
 (defun +my/allman-braces ()
   (c-set-offset 'substatement-open 0)
   (c-set-offset 'inline-open 0)
@@ -217,42 +219,72 @@
 (add-hook 'c-mode-hook #'+my/allman-braces)
 (add-hook 'c++-mode-hook #'+my/allman-braces)
 
+(defun my/wing-root ()
+  "Find the wing project's code/ dir by walking up from the current buffer."
+  (or (locate-dominating-file default-directory "build.bat")
+      "C:/dev/wing/wing/code/")) ;; fallback
+
+(defun my/wing-compile (cmd)
+  (let ((default-directory (my/wing-root)))
+    (compile cmd)))
+
+(defun my/piso-root ()
+  "Find the wing project's code/ dir by walking up from the current buffer."
+  (or (locate-dominating-file default-directory "piso.csproj")
+      "C:/dev/wing/wing/tools/piso")) ;; fallback
+
+(defvar my/devenv-path
+  "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/devenv.exe")
+
 (with-eval-after-load 'cc-mode
   (dolist (map (list c-mode-map c++-mode-map))
-  (define-key c-mode-map (kbd "M-m")   (lambda () (interactive) (compile "build game")))
-  (define-key c-mode-map (kbd "M-M")   (lambda () (interactive) (compile "build game2")))
-  (define-key c-mode-map (kbd "<f1>")  (lambda () (interactive) (compile "clean")))
 
-;;  (define-key c-mode-map (kbd "<f2>")  (lambda () (interactive) (compile "run")))
-;;
-;;  (define-key c-mode-map (kbd "<f3>")
-;;    (lambda () (interactive)
-;;      (let ((default-directory "C:/dev/wing/wing/code"))
-;;        (compilation-start "debug.bat" t))))
-;;
-;;
-    (define-key c-mode-map (kbd "<f2>")
+  ;; Build
+  (define-key c-mode-map (kbd "M-m")   (lambda () (interactive) (my/wing-compile "build game")))
+  (define-key c-mode-map (kbd "M-M")   (lambda () (interactive) (my/wing-compile "build game2")))
+  (define-key c-mode-map (kbd "<f4>")  (lambda () (interactive) (my/wing-compile "build engine")))
+  (define-key c-mode-map (kbd "<S-f4>")(lambda () (interactive) (my/wing-compile "build engine2")))
+  (define-key c-mode-map (kbd "<f5>")  (lambda () (interactive) (my/wing-compile "build main")))
+  (define-key c-mode-map (kbd "<f6>")  (lambda () (interactive) (my/wing-compile "build imgui")))
+  (define-key c-mode-map (kbd "<S-f6>")(lambda () (interactive) (my/wing-compile "build imgui2")))
+
+  ;; Piso
+  (define-key c-mode-map (kbd "<f7>")
     (lambda () (interactive)
-        (let ((default-directory "C:/dev/wing/wing/bin/"))
-        (compilation-start "C:/dev/wing/wing/code/run.bat vulkan" t))))
+      (let ((default-directory (my/piso-root)))
+        (compilation-start "dotnet build piso.csproj -o ../../bin -c Debug" t))))
 
-    (define-key c-mode-map (kbd "<f3>")
+  (define-key c-mode-map (kbd "<S-f7>")
     (lambda () (interactive)
-        (let ((default-directory "C:/dev/wing/wing/bin/"))
-        (compilation-start "C:/dev/wing/wing/code/debug.bat" t))))
+      (let ((default-directory (my/wing-root)))
+        (compilation-start "dotnet run --project ../tools/piso/piso.csproj --configuration Debug --no-restore" t))))
 
-  (define-key c-mode-map (kbd "<f4>")  (lambda () (interactive) (compile "build engine")))
-  (define-key c-mode-map (kbd "<S-f4>")(lambda () (interactive) (compile "build engine2")))
-  (define-key c-mode-map (kbd "<f5>")  (lambda () (interactive) (compile "build main")))
-  (define-key c-mode-map (kbd "<f6>")  (lambda () (interactive) (compile "build imgui")))
-  (define-key c-mode-map (kbd "<S-f6>")(lambda () (interactive) (compile "build imgui2")))
+  (define-key c-mode-map (kbd "<f8>")
+    (lambda () (interactive)
+      (let ((default-directory (my/piso-root)))
+        (start-process "devenv-piso" nil my/devenv-path "piso.csproj"))))
+
+  ;; Bat files
+  (define-key c-mode-map (kbd "<f1>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
+    (compilation-start "clean" t))))
+
+  (define-key c-mode-map (kbd "<f2>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
+    (compilation-start "run vulkan" t))))
+
+  (define-key c-mode-map (kbd "<S-f2>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
+    (compilation-start "run d3d11" t))))
+
+  (define-key c-mode-map (kbd "<f3>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
+    (compilation-start "debug vulkan" t))))
+
+  (define-key c-mode-map (kbd "<S-f3>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
+    (compilation-start "debug d3d11" t))))
+
   ;; vanilla equivalent of Doom's +lookup/definition (uses eglot's xref backend)
   (define-key c-mode-map (kbd "<f12>") #'xref-find-definitions)))
 
-;;; -- centaur-tabs: group tabs by perspective, so each frame
-;;;    (which gets its own perspective via after-make-frame-functions
-;;;    in init.el) only shows its own buffers, not other frames' -------
-;;;
+(setq eglot-inlay-hints-mode nil)
+
 (with-eval-after-load 'centaur-tabs
   (centaur-tabs-mode 1)
   (defun +my/centaur-tabs-buffer-groups ()
@@ -418,3 +450,5 @@
 
 (map! "M-y" #'+trist/insert-note-comment)
 (map! "M-t" #'+trist/insert-todo-comment)
+
+(my/load-vcvars "x64")
