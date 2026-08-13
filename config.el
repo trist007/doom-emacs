@@ -368,7 +368,7 @@
            "* %?\n%U\n%a\n")
           ("gw" "Wing note" entry
            (file+headline ,(concat gamedev-dir "wing.org") "Inbox")
-           "* %?\n%U\n%a\n")
+           "* %?\n%U\n%a\n**Tasks:** [/]\n  - [ ] ")
           ("g+" "C/C++ note" entry
            (file+headline ,(concat gamedev-dir "c.org") "Inbox")
            "* %?\n%U\n%a\n")
@@ -464,3 +464,4 @@
 
 ;; SPIR-V disassembly (.spvasm, from spirv-dis) — asm-mode is closest fit
 (add-to-list 'auto-mode-alist '("\\.spvasm\\'" . asm-mode))
+(display-time-mode 1)
