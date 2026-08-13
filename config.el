@@ -32,7 +32,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-wilmersdorf)
+;; (setq doom-theme 'doom-wilmersdorf)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -125,7 +125,9 @@
                              doom-tokyo-night
                              doom-wilmersdorf
                              doom-outrun-electric
-                             doom-winter-is-coming-dark-blue)
+                             doom-winter-is-coming-dark-blue
+                             ef-reverie
+                             ef-deuteranopia-light)
   "List of my favorite themes to choose from.")
 
 (defun my/choose-favorite-theme ()
@@ -465,3 +467,5 @@
 ;; SPIR-V disassembly (.spvasm, from spirv-dis) — asm-mode is closest fit
 (add-to-list 'auto-mode-alist '("\\.spvasm\\'" . asm-mode))
 (display-time-mode 1)
+(add-hook 'doom-init-ui-hook
+  (lambda () (load-theme 'ef-reverie t)))

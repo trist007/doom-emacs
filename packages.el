@@ -55,3 +55,4 @@
 
 (package! org-noter)
 (package! glsl-mode)
+(package! ef-themes)
