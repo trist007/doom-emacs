@@ -468,4 +468,4 @@
 (add-to-list 'auto-mode-alist '("\\.spvasm\\'" . asm-mode))
 (display-time-mode 1)
 (add-hook 'doom-init-ui-hook
-  (lambda () (load-theme 'ef-reverie t)))
+  (lambda () (load-theme 'ef-maris-dark t)))
