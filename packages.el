@@ -54,3 +54,4 @@
 (package! djvu)
 
 (package! org-noter)
+(package! glsl-mode)

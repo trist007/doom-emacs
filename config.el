@@ -32,7 +32,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-tokyo-night)
+(setq doom-theme 'doom-wilmersdorf)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -74,22 +74,28 @@
 ;; they are implemented.
 (defvar my/original-path (getenv "PATH")
   "PATH captured once at Emacs startup, before any vcvars loading.")
+
 (defvar my/original-exec-path exec-path
   "exec-path captured once at Emacs startup, before any vcvars loading.")
 
 (setq vc-handled-backends nil)
 
 (defun my/load-vcvars (&optional arch)
-  "Load MSVC environment variables into Emacs's process-environment.
-Always starts from the original PATH/exec-path to avoid duplicate accumulation."
+  "Load MSVC environment variables into Emacs's process-environment."
   (interactive)
   (let* ((arch (or arch "x64"))
          (vcvarsall "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat")
-         (cmd (format "\"%s\" %s && set" vcvarsall arch))
-         (output (shell-command-to-string (format "cmd.exe /c \"%s\"" cmd))))
-    ;; Reset to baseline before applying vcvars, so repeated calls don't stack
+         (tmpfile (make-temp-file "vcvars-" nil ".bat"))
+         (output "")
+         (path-applied nil))
+    (with-temp-file tmpfile
+      (insert (format "@echo off\r\ncall \"%s\" %s\r\nset\r\n" vcvarsall arch)))
+    (setq output (shell-command-to-string (format "cmd.exe /c \"%s\"" tmpfile)))
+    (delete-file tmpfile)
+
     (setenv "PATH" my/original-path)
     (setq exec-path my/original-exec-path)
+
     (dolist (line (split-string output "\n"))
       (when (string-match "^\\([A-Za-z_][A-Za-z0-9_]*\\)=\\(.*\\)$" line)
         (let ((var (match-string 1 line))
@@ -97,9 +103,14 @@ Always starts from the original PATH/exec-path to avoid duplicate accumulation."
           (if (string-equal (upcase var) "PATH")
               (progn
                 (setenv "PATH" (concat val ";" my/original-path))
-                (setq exec-path (append (split-string val ";") my/original-exec-path)))
+                (setq exec-path (append (split-string val ";") my/original-exec-path))
+                (setq path-applied t))
             (setenv var val)))))
-    (message "MSVC environment loaded (%s)" arch)))
+
+    (if (and path-applied (executable-find "cl"))
+        (message "MSVC environment loaded (%s)" arch)
+      (message "WARNING: vcvars FAILED (path-applied: %s, cl found: %s). Raw output length: %d"
+               path-applied (and (executable-find "cl") t) (length output)))))
 
 (setq magit-git-executable "C:/Program Files/Git/bin/git.exe")
 (setq magit-refresh-status-buffer t) ; if you don't need status auto-refreshed constantly
@@ -283,7 +294,14 @@ Always starts from the original PATH/exec-path to avoid duplicate accumulation."
   ;; vanilla equivalent of Doom's +lookup/definition (uses eglot's xref backend)
   (define-key c-mode-map (kbd "<f12>") #'xref-find-definitions)))
 
-(setq eglot-inlay-hints-mode nil)
+(add-to-list 'display-buffer-alist
+             '("\\*compilation\\*"
+               (display-buffer-reuse-window
+               ;; display-buffer-in-side-window)
+                display-buffer-at-bottom)
+               ;;(side . bottom)
+               (window-height . 0.25)
+               (reusable-frames . visible)))
 
 (with-eval-after-load 'centaur-tabs
   (centaur-tabs-mode 1)
@@ -391,6 +409,15 @@ Always starts from the original PATH/exec-path to avoid duplicate accumulation."
 
 (use-package! djvu)
 
+(use-package! glsl-mode
+  :mode (("\\.glsl\\'" . glsl-mode)
+         ("\\.vert\\'" . glsl-mode)
+         ("\\.frag\\'" . glsl-mode)
+         ("\\.geom\\'" . glsl-mode)
+         ("\\.comp\\'" . glsl-mode)
+         ("\\.tesc\\'" . glsl-mode)
+         ("\\.tese\\'" . glsl-mode)))
+
 (use-package! org-noter
   :after djvu)
 
@@ -452,3 +479,14 @@ Always starts from the original PATH/exec-path to avoid duplicate accumulation."
 (map! "M-t" #'+trist/insert-todo-comment)
 
 (my/load-vcvars "x64")
+(add-hook 'eglot-managed-mode-hook
+          (lambda () (eglot-inlay-hints-mode -1)))
+
+;; HLSL / Slang — no dedicated Emacs mode exists yet; c-mode gives
+;; reasonable-enough highlighting since the syntax is C-derived
+(add-to-list 'auto-mode-alist '("\\.hlsl\\'" . c-mode))
+(add-to-list 'auto-mode-alist '("\\.hlsli\\'" . c-mode))
+(add-to-list 'auto-mode-alist '("\\.slang\\'" . c-mode))
+
+;; SPIR-V disassembly (.spvasm, from spirv-dis) — asm-mode is closest fit
+(add-to-list 'auto-mode-alist '("\\.spvasm\\'" . asm-mode))
