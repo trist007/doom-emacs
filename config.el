@@ -113,7 +113,7 @@
                path-applied (and (executable-find "cl") t) (length output)))))
 
 (setq magit-git-executable "C:/Program Files/Git/bin/git.exe")
-(setq magit-refresh-status-buffer t) ; if you don't need status auto-refreshed constantly
+(setq magit-refresh-status-buffer t)
 (setq magit-diff-refine-hunk nil) ; word-level diff highlighting is expensive; nil disables, 'all enables everywhere
 
 ;;(add-to-list 'exec-path "C:/raddbg")
@@ -128,16 +128,6 @@
                              doom-winter-is-coming-dark-blue)
   "List of my favorite themes to choose from.")
 
-;; Create a command to choose only from your favorites
-;;(defun my/choose-favorite-theme ()
-;;  "Read a theme from my-favorite-themes and load it."
-;;  (interactive)
-;;  (let ((chosen-theme (completing-read "Load favorite theme: " my-favorite-themes)))
-;;    (when chosen-theme
-;;      (setq doom-theme (intern chosen-theme))
-;;      (load-theme (intern chosen-theme) t))))
-;;
-;;
 (defun my/choose-favorite-theme ()
   "Read and instantly preview a theme from my-favorite-themes."
   (interactive)
@@ -314,19 +304,6 @@
   (add-hook 'persp-activated-hook
             (lambda (&rest _) (centaur-tabs-headline-match))));;
 
-;; Perspective doesn't know centaur-tabs exists, so force it to
-;; recompute its tab set whenever you switch frames/perspectives --
-;; otherwise the tab bar lags a frame behind until you touch a buffer.
-;;(with-eval-after-load 'perspective
-;;  (add-hook 'persp-activated-functions
-;;            (lambda (&rest _) (centaur-tabs-headline-match))))
-
-;;; -- dape: wing-debug launch config --------------------------------------
-;; NOTE: your original config uses lldb-dap. It ships with LLVM on
-;; Linux/macOS but is NOT bundled with LLVM-for-Windows installers -- grab
-;; lldb-dap.exe from LLVM's GitHub releases and put it on PATH, or switch
-;; to a Windows-friendlier adapter (cpptools' DAP server, or gdb 14+'s
-;; native DAP support). Update :program/:cwd to your real Windows paths.
 (with-eval-after-load 'dape
   (add-to-list 'dape-configs
     `(wing-debug
@@ -388,6 +365,9 @@
            "* %?\n%U\n%a\n")
           ("go" "Org note" entry
            (file+headline ,(concat gamedev-dir "orgmode.org") "Inbox")
+           "* %?\n%U\n%a\n")
+          ("gw" "Wing note" entry
+           (file+headline ,(concat gamedev-dir "wing.org") "Inbox")
            "* %?\n%U\n%a\n")
           ("g+" "C/C++ note" entry
            (file+headline ,(concat gamedev-dir "c.org") "Inbox")
@@ -462,17 +442,13 @@
         (cons '("NOTE" . "Red")
               (assoc-delete-all "NOTE" (assoc-delete-all "TODO" hl-todo-keyword-faces)))))
 
-;; Insert "// NOTE(trist007): " at point
 (defun +trist/insert-note-comment ()
-  "Insert a comment-syntax-aware NOTE tag."
   (interactive)
   (insert "// NOTE(trist007): "))
-  ;; (insert (concat (string-trim-right comment-start) " NOTE(trist007): ")))
 
 (defun +trist/insert-todo-comment ()
   "Insert a comment-syntax-aware TODO tag."
   (interactive)
-  ;; (insert (concat (string-trim-right comment-start) " TODO(trist007): ")))
   (insert "// TODO(trist007): "))
 
 (map! "M-y" #'+trist/insert-note-comment)
@@ -482,8 +458,6 @@
 (add-hook 'eglot-managed-mode-hook
           (lambda () (eglot-inlay-hints-mode -1)))
 
-;; HLSL / Slang — no dedicated Emacs mode exists yet; c-mode gives
-;; reasonable-enough highlighting since the syntax is C-derived
 (add-to-list 'auto-mode-alist '("\\.hlsl\\'" . c-mode))
 (add-to-list 'auto-mode-alist '("\\.hlsli\\'" . c-mode))
 (add-to-list 'auto-mode-alist '("\\.slang\\'" . c-mode))
