@@ -394,7 +394,6 @@
     (map! :map c-mode-map "<f6>" (cmd! (wing-compile "imgui")))
     (map! :map c-mode-map "<f12>" #'+lookup/definition))
 
-
 ;;; -- org: src blocks, directory, gamedev capture templates ---------------
 (with-eval-after-load 'org
   (setq org-src-fontify-natively t)
