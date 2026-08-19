@@ -245,6 +245,29 @@
 (add-hook 'c-mode-hook #'+my/allman-braces)
 (add-hook 'c++-mode-hook #'+my/allman-braces)
 
+(defun my/wing-run (renderer)
+  (let* ((default-directory (my/wing-root))
+         (buf (get-buffer-create "*wing-run*")))
+    (with-current-buffer buf
+      (erase-buffer))
+    (let ((proc (start-process "wing" buf "cmd.exe" "/c" "run.bat" renderer)))
+      (set-process-filter proc #'my/wing-run--filter))
+    (display-buffer buf)))
+
+(defun my/wing-run--filter (proc string)
+  (when (buffer-live-p (process-buffer proc))
+    (with-current-buffer (process-buffer proc)
+      (let ((moving (= (point) (process-mark proc))))
+        (save-excursion
+          (goto-char (process-mark proc))
+          (insert string)
+          (set-marker (process-mark proc) (point)))
+        (when moving
+          (goto-char (process-mark proc))
+          ;; also scroll any window currently showing this buffer
+          (dolist (win (get-buffer-window-list (current-buffer) nil t))
+            (set-window-point win (process-mark proc))))))))
+
 (defun my/wing-root ()
   "Find the wing project's code/ dir by walking up from the current buffer."
   (or (locate-dominating-file default-directory "build.bat")
@@ -302,11 +325,12 @@
   (define-key c-mode-map (kbd "<f1>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
     (compilation-start "clean" t))))
 
-  (define-key c-mode-map (kbd "<f2>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
-    (start-process "wing" nil "cmd.exe" "/c" "run.bat" "vulkan"))))
+  (define-key c-mode-map (kbd "<f2>")  (lambda () (interactive) (my/wing-run "vulkan")))
+  ;;(define-key c-mode-map (kbd "<f2>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
+    ;;(start-process "wing" "*wing-run*" "cmd.exe" "/c" "run.bat" "vulkan")
+    ;;(display-buffer "*wing-run*"))))
 
-  (define-key c-mode-map (kbd "<S-f2>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
-    (start-process "wing" nil "cmd.exe" "/c" "run.bat" "d3d11"))))
+  (define-key c-mode-map (kbd "<S-f2>")  (lambda () (interactive) (my/wing-run "d3d11")))
 
   (define-key c-mode-map (kbd "<f3>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
     (compilation-start "debug vulkan" t))))
@@ -327,6 +351,13 @@
 ;;                (reusable-frames . visible)))
 ;; 
 (set-popup-rule! "\\*compilation\\*"
+  :side 'bottom
+  :height 0.25
+  :quit t
+  :select nil
+  :ttl nil)
+
+(set-popup-rule! "\\*wing-run\\*"
   :side 'bottom
   :height 0.25
   :quit t
