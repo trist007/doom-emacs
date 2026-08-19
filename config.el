@@ -80,6 +80,7 @@
 
 (setq vc-handled-backends nil)
 
+;; (setq compilation-always-kill t)
 (defun my/load-vcvars (&optional arch)
   "Load MSVC environment variables into Emacs's process-environment."
   (interactive)
@@ -92,10 +93,8 @@
       (insert (format "@echo off\r\ncall \"%s\" %s\r\nset\r\n" vcvarsall arch)))
     (setq output (shell-command-to-string (format "cmd.exe /c \"%s\"" tmpfile)))
     (delete-file tmpfile)
-
     (setenv "PATH" my/original-path)
     (setq exec-path my/original-exec-path)
-
     (dolist (line (split-string output "\n"))
       (when (string-match "^\\([A-Za-z_][A-Za-z0-9_]*\\)=\\(.*\\)$" line)
         (let ((var (match-string 1 line))
@@ -106,17 +105,15 @@
                 (setq exec-path (append (split-string val ";") my/original-exec-path))
                 (setq path-applied t))
             (setenv var val)))))
-
-    (if (and path-applied (executable-find "cl"))
+    (if (and (executable-find "cl") (getenv "VCINSTALLDIR"))
         (message "MSVC environment loaded (%s)" arch)
-      (message "WARNING: vcvars FAILED (path-applied: %s, cl found: %s). Raw output length: %d"
-               path-applied (and (executable-find "cl") t) (length output)))))
+      (message "WARNING: vcvars FAILED (path-applied: %s, VCINSTALLDIR: %s, cl found: %s). Raw output length: %d"
+                path-applied (getenv "VCINSTALLDIR") (and (executable-find "cl") t) (length output)))))
 
 (setq magit-git-executable "C:/Program Files/Git/bin/git.exe")
 (setq magit-refresh-status-buffer t)
 (setq magit-diff-refine-hunk nil) ; word-level diff highlighting is expensive; nil disables, 'all enables everywhere
 
-;;(add-to-list 'exec-path "C:/raddbg")
 ;; Define your favorite themes here
 (defvar my-favorite-themes '(doom-one
                              doom-dracula
@@ -188,14 +185,40 @@
 (which-function-mode 1)
 
 ;;; -- Global keybindings --------------------------------------------------
-(global-set-key (kbd "C-,") #'other-frame) ; vanilla equiv. of +evil/next-frame
+(defun my/other-frame-c-mode ()
+  "Cycle to the next frame whose selected buffer is in a C/C++ (or asm) mode."
+  (interactive)
+  (let* ((frames (frame-list))
+         (n (length frames))
+         (start (cl-position (selected-frame) frames))
+         (i (1+ start))
+         found)
+    (while (and (not found) (< i (+ start n)))
+      (let* ((f (nth (mod i n) frames))
+             (buf (window-buffer (frame-selected-window f))))
+        (when (with-current-buffer buf
+              (or (derived-mode-p 'c-mode 'c++-mode 'asm-mode 'dired-mode)
+                  (derived-mode-p 'compilation-mode)))
+          (setq found f)))
+      (setq i (1+ i)))
+    (if found
+        (select-frame-set-input-focus found)
+      (message "No other frame with a C/C++/asm buffer"))))
+
+(global-set-key (kbd "C-,") #'my/other-frame-c-mode)
 (global-set-key (kbd "C-c c") #'org-capture)
 
 (map! :n "C-<tab>" #'centaur-tabs-forward
       :n "C-S-<tab>" #'centaur-tabs-backward)
 
-(setq-default tab-width 2
-              indent-tabs-mode nil)  ;; nil = spaces, not literal tabs
+(setq-hook! '(c-mode-hook c++-mode-hook)
+  c-basic-offset 2
+  tab-width 2
+  indent-tabs-mode nil)
+
+(after! cc-mode
+  (dolist (hook '(c-mode-hook c++-mode-hook))
+    (add-hook hook (lambda () (c-set-offset 'inclass 2)))))
 
 (map! :map (c-mode-map c++-mode-map)
       :n "C-a" #'align)
@@ -251,6 +274,14 @@
   (define-key c-mode-map (kbd "<f6>")  (lambda () (interactive) (my/wing-compile "build imgui")))
   (define-key c-mode-map (kbd "<S-f6>")(lambda () (interactive) (my/wing-compile "build imgui2")))
 
+  ;; glbParser
+  (define-key c-mode-map (kbd "<f9>")  (lambda () (interactive) (my/wing-compile "build glb")))
+  (define-key c-mode-map (kbd "<S-f9>")  (lambda () (interactive) (my/wing-compile "build glb2")))
+  (define-key c-mode-map (kbd "<f10>")(lambda () (interactive) (let ((default-directory (my/wing-root)))
+    (compilation-start "glb vulkan" t))))
+  (define-key c-mode-map (kbd "<S-f10>")(lambda () (interactive) (let ((default-directory (my/wing-root)))
+    (compilation-start "glb d3d11" t))))
+
   ;; Piso
   (define-key c-mode-map (kbd "<f7>")
     (lambda () (interactive)
@@ -272,10 +303,10 @@
     (compilation-start "clean" t))))
 
   (define-key c-mode-map (kbd "<f2>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
-    (compilation-start "run vulkan" t))))
+    (start-process "wing" nil "cmd.exe" "/c" "run.bat" "vulkan"))))
 
   (define-key c-mode-map (kbd "<S-f2>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
-    (compilation-start "run d3d11" t))))
+    (start-process "wing" nil "cmd.exe" "/c" "run.bat" "d3d11"))))
 
   (define-key c-mode-map (kbd "<f3>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
     (compilation-start "debug vulkan" t))))
@@ -286,14 +317,21 @@
   ;; vanilla equivalent of Doom's +lookup/definition (uses eglot's xref backend)
   (define-key c-mode-map (kbd "<f12>") #'xref-find-definitions)))
 
-(add-to-list 'display-buffer-alist
-             '("\\*compilation\\*"
-               (display-buffer-reuse-window
-               ;; display-buffer-in-side-window)
-                display-buffer-at-bottom)
-               ;;(side . bottom)
-               (window-height . 0.25)
-               (reusable-frames . visible)))
+;; (add-to-list 'display-buffer-alist
+;;              '("\\*compilation\\*"
+;;                (display-buffer-reuse-window
+;;                ;; display-buffer-in-side-window)
+;;                 display-buffer-at-bottom)
+;;                ;;(side . bottom)
+;;                (window-height . 0.25)
+;;                (reusable-frames . visible)))
+;; 
+(set-popup-rule! "\\*compilation\\*"
+  :side 'bottom
+  :height 0.25
+  :quit t
+  :select nil
+  :ttl nil)
 
 (with-eval-after-load 'centaur-tabs
   (centaur-tabs-mode 1)
