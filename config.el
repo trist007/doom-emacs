@@ -40,7 +40,9 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "C:/dev/org/")
+(when (eq system-type 'windows-nt)
+        (setq org-directory "C:/dev/org/")
+  (setq org-directory "~/org/"))
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `with-eval-after-load' block, otherwise Doom's defaults may override your
@@ -80,40 +82,6 @@
 
 (setq vc-handled-backends nil)
 
-;; (setq compilation-always-kill t)
-(defun my/load-vcvars (&optional arch)
-  "Load MSVC environment variables into Emacs's process-environment."
-  (interactive)
-  (let* ((arch (or arch "x64"))
-         (vcvarsall "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat")
-         (tmpfile (make-temp-file "vcvars-" nil ".bat"))
-         (output "")
-         (path-applied nil))
-    (with-temp-file tmpfile
-      (insert (format "@echo off\r\ncall \"%s\" %s\r\nset\r\n" vcvarsall arch)))
-    (setq output (shell-command-to-string (format "cmd.exe /c \"%s\"" tmpfile)))
-    (delete-file tmpfile)
-    (setenv "PATH" my/original-path)
-    (setq exec-path my/original-exec-path)
-    (dolist (line (split-string output "\n"))
-      (when (string-match "^\\([A-Za-z_][A-Za-z0-9_]*\\)=\\(.*\\)$" line)
-        (let ((var (match-string 1 line))
-              (val (string-trim (match-string 2 line))))
-          (if (string-equal (upcase var) "PATH")
-              (progn
-                (setenv "PATH" (concat val ";" my/original-path))
-                (setq exec-path (append (split-string val ";") my/original-exec-path))
-                (setq path-applied t))
-            (setenv var val)))))
-    (if (and (executable-find "cl") (getenv "VCINSTALLDIR"))
-        (message "MSVC environment loaded (%s)" arch)
-      (message "WARNING: vcvars FAILED (path-applied: %s, VCINSTALLDIR: %s, cl found: %s). Raw output length: %d"
-                path-applied (getenv "VCINSTALLDIR") (and (executable-find "cl") t) (length output)))))
-
-(setq magit-git-executable "C:/Program Files/Git/bin/git.exe")
-(setq magit-refresh-status-buffer t)
-(setq magit-diff-refine-hunk nil) ; word-level diff highlighting is expensive; nil disables, 'all enables everywhere
-
 ;; Define your favorite themes here
 (defvar my-favorite-themes '(doom-one
                              doom-dracula
@@ -150,14 +118,6 @@
 ;; Bind the command to a convenient shortcut (e.g., SPC h T)
 (map! :leader
       :desc "Load favorite theme" "h T" #'my/choose-favorite-theme)
-
-(setq epg-gpg-program "C:/msys64/usr/bin/gpg.exe")
-
-(after! emms
-  (require 'emms-player-mpv)
-  (add-to-list 'emms-player-list 'emms-player-mpv)
-  (setq emms-player-mpv-executable "C:/ProgramData/chocolatey/lib/mpvio.install/tools/mpv.exe"))
-
 (defun my/move-line-up ()
   "Move the current line up one line."
   (interactive)
@@ -174,7 +134,6 @@
   (forward-line -1))
 
 (map! "M-j" #'my/move-line-down)
-
 
 (set-face-attribute 'default nil :family "Iosevka" :height 220) ; height is 1/10 pt
 
@@ -245,111 +204,6 @@
 (add-hook 'c-mode-hook #'+my/allman-braces)
 (add-hook 'c++-mode-hook #'+my/allman-braces)
 
-(defun my/wing-run (renderer)
-  (let* ((default-directory (my/wing-root))
-         (buf (get-buffer-create "*wing-run*")))
-    (with-current-buffer buf
-      (erase-buffer))
-    (let ((proc (start-process "wing" buf "cmd.exe" "/c" "run.bat" renderer)))
-      (set-process-filter proc #'my/wing-run--filter))
-    (display-buffer buf)))
-
-(defun my/wing-run--filter (proc string)
-  (when (buffer-live-p (process-buffer proc))
-    (with-current-buffer (process-buffer proc)
-      (let ((moving (= (point) (process-mark proc))))
-        (save-excursion
-          (goto-char (process-mark proc))
-          (insert string)
-          (set-marker (process-mark proc) (point)))
-        (when moving
-          (goto-char (process-mark proc))
-          ;; also scroll any window currently showing this buffer
-          (dolist (win (get-buffer-window-list (current-buffer) nil t))
-            (set-window-point win (process-mark proc))))))))
-
-(defun my/wing-root ()
-  "Find the wing project's code/ dir by walking up from the current buffer."
-  (or (locate-dominating-file default-directory "build.bat")
-      "C:/dev/wing/wing/code/")) ;; fallback
-
-(defun my/wing-compile (cmd)
-  (let ((default-directory (my/wing-root)))
-    (compile cmd)))
-
-(defun my/piso-root ()
-  "Find the wing project's code/ dir by walking up from the current buffer."
-  (or (locate-dominating-file default-directory "piso.csproj")
-      "C:/dev/wing/wing/tools/piso")) ;; fallback
-
-(defvar my/devenv-path
-  "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/devenv.exe")
-
-(with-eval-after-load 'cc-mode
-  (dolist (map (list c-mode-map c++-mode-map))
-
-  ;; Build
-  (define-key c-mode-map (kbd "M-m")   (lambda () (interactive) (my/wing-compile "build game")))
-  (define-key c-mode-map (kbd "M-M")   (lambda () (interactive) (my/wing-compile "build game2")))
-  (define-key c-mode-map (kbd "<f4>")  (lambda () (interactive) (my/wing-compile "build engine")))
-  (define-key c-mode-map (kbd "<S-f4>")(lambda () (interactive) (my/wing-compile "build engine2")))
-  (define-key c-mode-map (kbd "<f5>")  (lambda () (interactive) (my/wing-compile "build main")))
-  (define-key c-mode-map (kbd "<f6>")  (lambda () (interactive) (my/wing-compile "build imgui")))
-  (define-key c-mode-map (kbd "<S-f6>")(lambda () (interactive) (my/wing-compile "build imgui2")))
-
-  ;; glbParser
-  (define-key c-mode-map (kbd "<f9>")  (lambda () (interactive) (my/wing-compile "build glb")))
-  (define-key c-mode-map (kbd "<S-f9>")  (lambda () (interactive) (my/wing-compile "build glb2")))
-  (define-key c-mode-map (kbd "<f10>")(lambda () (interactive) (let ((default-directory (my/wing-root)))
-    (compilation-start "glb vulkan" t))))
-  (define-key c-mode-map (kbd "<S-f10>")(lambda () (interactive) (let ((default-directory (my/wing-root)))
-    (compilation-start "glb d3d11" t))))
-
-  ;; Piso
-  (define-key c-mode-map (kbd "<f7>")
-    (lambda () (interactive)
-      (let ((default-directory (my/piso-root)))
-        (compilation-start "dotnet build piso.csproj -o ../../bin -c Debug" t))))
-
-  (define-key c-mode-map (kbd "<S-f7>")
-    (lambda () (interactive)
-      (let ((default-directory (my/wing-root)))
-        (compilation-start "dotnet run --project ../tools/piso/piso.csproj --configuration Debug --no-restore" t))))
-
-  (define-key c-mode-map (kbd "<f8>")
-    (lambda () (interactive)
-      (let ((default-directory (my/piso-root)))
-        (start-process "devenv-piso" nil my/devenv-path "piso.csproj"))))
-
-  ;; Bat files
-  (define-key c-mode-map (kbd "<f1>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
-    (compilation-start "clean" t))))
-
-  (define-key c-mode-map (kbd "<f2>")  (lambda () (interactive) (my/wing-run "vulkan")))
-  ;;(define-key c-mode-map (kbd "<f2>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
-    ;;(start-process "wing" "*wing-run*" "cmd.exe" "/c" "run.bat" "vulkan")
-    ;;(display-buffer "*wing-run*"))))
-
-  (define-key c-mode-map (kbd "<S-f2>")  (lambda () (interactive) (my/wing-run "d3d11")))
-
-  (define-key c-mode-map (kbd "<f3>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
-    (compilation-start "debug vulkan" t))))
-
-  (define-key c-mode-map (kbd "<S-f3>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
-    (compilation-start "debug d3d11" t))))
-
-  ;; vanilla equivalent of Doom's +lookup/definition (uses eglot's xref backend)
-  (define-key c-mode-map (kbd "<f12>") #'xref-find-definitions)))
-
-;; (add-to-list 'display-buffer-alist
-;;              '("\\*compilation\\*"
-;;                (display-buffer-reuse-window
-;;                ;; display-buffer-in-side-window)
-;;                 display-buffer-at-bottom)
-;;                ;;(side . bottom)
-;;                (window-height . 0.25)
-;;                (reusable-frames . visible)))
-;; 
 (set-popup-rule! "\\*compilation\\*"
   :side 'bottom
   :height 0.25
@@ -375,26 +229,160 @@
   (add-hook 'persp-activated-hook
             (lambda (&rest _) (centaur-tabs-headline-match))));;
 
-(with-eval-after-load 'dape
-  (add-to-list 'dape-configs
-    `(wing-debug
-      modes (c-mode c++-mode)
-      command "lldb-dap"
-      command-cwd dape-cwd-function
-      :type "lldb"
-      :request "launch"
-      :name "Debug wing"
-      :program "C:/Users/<YOUR_USERNAME>/dev/wing/wing/bin/wing.exe"
-      :cwd "C:/Users/<YOUR_USERNAME>/dev/wing/wing/code"
-      :args []
-      :stopOnEntry nil)))
+(when (eq system-type 'windows-nt)
+
+  (defun my/load-vcvars (&optional arch)
+    "Load MSVC environment variables into Emacs's process-environment."
+    (interactive)
+    (let* ((arch (or arch "x64"))
+           (vcvarsall "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat")
+           (tmpfile (make-temp-file "vcvars-" nil ".bat"))
+           (output "")
+           (path-applied nil))
+      (with-temp-file tmpfile
+        (insert (format "@echo off\r\ncall \"%s\" %s\r\nset\r\n" vcvarsall arch)))
+      (setq output (shell-command-to-string (format "cmd.exe /c \"%s\"" tmpfile)))
+      (delete-file tmpfile)
+      (setenv "PATH" my/original-path)
+      (setq exec-path my/original-exec-path)
+      (dolist (line (split-string output "\n"))
+        (when (string-match "^\\([A-Za-z_][A-Za-z0-9_]*\\)=\\(.*\\)$" line)
+          (let ((var (match-string 1 line))
+                (val (string-trim (match-string 2 line))))
+            (if (string-equal (upcase var) "PATH")
+                (progn
+                  (setenv "PATH" (concat val ";" my/original-path))
+                  (setq exec-path (append (split-string val ";") my/original-exec-path))
+                  (setq path-applied t))
+              (setenv var val)))))
+      (if (and (executable-find "cl") (getenv "VCINSTALLDIR"))
+          (message "MSVC environment loaded (%s)" arch)
+        (message "WARNING: vcvars FAILED (path-applied: %s, VCINSTALLDIR: %s, cl found: %s). Raw output length: %d"
+                  path-applied (getenv "VCINSTALLDIR") (and (executable-find "cl") t) (length output)))))
+
+  (setq magit-git-executable "C:/Program Files/Git/bin/git.exe")
+  (setq magit-refresh-status-buffer t)
+  (setq magit-diff-refine-hunk nil) ; word-level diff highlighting is expensive; nil disables, 'all enables everywhere
+
+  (setq epg-gpg-program "C:/msys64/usr/bin/gpg.exe")
+
+  (after! emms
+    (require 'emms-player-mpv)
+    (add-to-list 'emms-player-list 'emms-player-mpv)
+    (setq emms-player-mpv-executable "C:/ProgramData/chocolatey/lib/mpvio.install/tools/mpv.exe"))
+
+  (defun my/wing-run (renderer)
+    (let* ((default-directory (my/wing-root))
+           (buf (get-buffer-create "*wing-run*")))
+      (with-current-buffer buf
+        (erase-buffer))
+      (let ((proc (start-process "wing" buf "cmd.exe" "/c" "run.bat" renderer)))
+        (set-process-filter proc #'my/wing-run--filter))
+      (display-buffer buf)))
+
+  (defun my/wing-run--filter (proc string)
+    (when (buffer-live-p (process-buffer proc))
+      (with-current-buffer (process-buffer proc)
+        (let ((moving (= (point) (process-mark proc))))
+          (save-excursion
+            (goto-char (process-mark proc))
+            (insert string)
+            (set-marker (process-mark proc) (point)))
+          (when moving
+            (goto-char (process-mark proc))
+            ;; also scroll any window currently showing this buffer
+            (dolist (win (get-buffer-window-list (current-buffer) nil t))
+              (set-window-point win (process-mark proc))))))))
+
+  (defun my/wing-root ()
+    "Find the wing project's code/ dir by walking up from the current buffer."
+    (or (locate-dominating-file default-directory "build.bat")
+        "C:/dev/wing/wing/code/")) ;; fallback
+
+  (defun my/wing-compile (cmd)
+    (let ((default-directory (my/wing-root)))
+      (compile cmd)))
+
+  (defun my/piso-root ()
+    "Find the wing project's code/ dir by walking up from the current buffer."
+    (or (locate-dominating-file default-directory "piso.csproj")
+        "C:/dev/wing/wing/tools/piso")) ;; fallback
+
+  (defvar my/devenv-path
+    "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/devenv.exe")
+
+  (with-eval-after-load 'cc-mode
+    (dolist (map (list c-mode-map c++-mode-map))
+
+    ;; Build
+    (define-key map (kbd "M-m")   (lambda () (interactive) (my/wing-compile "build game")))
+    (define-key map (kbd "M-M")   (lambda () (interactive) (my/wing-compile "build game2")))
+    (define-key map (kbd "<f4>")  (lambda () (interactive) (my/wing-compile "build engine")))
+    (define-key map (kbd "<S-f4>")(lambda () (interactive) (my/wing-compile "build engine2")))
+    (define-key map (kbd "<f5>")  (lambda () (interactive) (my/wing-compile "build main")))
+    (define-key map (kbd "<f6>")  (lambda () (interactive) (my/wing-compile "build imgui")))
+    (define-key map (kbd "<S-f6>")(lambda () (interactive) (my/wing-compile "build imgui2")))
+
+    ;; glbParser
+    (define-key map (kbd "<f9>")  (lambda () (interactive) (my/wing-compile "build glb")))
+    (define-key map (kbd "<S-f9>")  (lambda () (interactive) (my/wing-compile "build glb2")))
+    (define-key map (kbd "<f10>")(lambda () (interactive) (let ((default-directory (my/wing-root)))
+      (compilation-start "glb vulkan" t))))
+    (define-key map (kbd "<S-f10>")(lambda () (interactive) (let ((default-directory (my/wing-root)))
+      (compilation-start "glb d3d11" t))))
+
+    ;; Piso
+    (define-key map (kbd "<f7>")
+      (lambda () (interactive)
+        (let ((default-directory (my/piso-root)))
+          (compilation-start "dotnet build piso.csproj -o ../../bin -c Debug" t))))
+
+    (define-key map (kbd "<S-f7>")
+      (lambda () (interactive)
+        (let ((default-directory (my/wing-root)))
+          (compilation-start "dotnet run --project ../tools/piso/piso.csproj --configuration Debug --no-restore" t))))
+
+    (define-key map (kbd "<f8>")
+      (lambda () (interactive)
+        (let ((default-directory (my/piso-root)))
+          (start-process "devenv-piso" nil my/devenv-path "piso.csproj"))))
+
+    ;; Bat files
+    (define-key map (kbd "<f1>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
+      (compilation-start "clean" t))))
+
+    (define-key map (kbd "<f2>")  (lambda () (interactive) (my/wing-run "vulkan")))
+
+    (define-key map (kbd "<S-f2>")  (lambda () (interactive) (my/wing-run "d3d11")))
+
+    (define-key map (kbd "<f3>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
+      (compilation-start "debug vulkan" t))))
+
+    (define-key map (kbd "<S-f3>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
+      (compilation-start "debug d3d11" t))))
+
+    ;; vanilla equivalent of Doom's +lookup/definition (uses eglot's xref backend)
+    (define-key map (kbd "<f12>") #'xref-find-definitions)))
+
+  (with-eval-after-load 'dape
+    (add-to-list 'dape-configs
+      `(wing-debug
+        modes (c-mode c++-mode)
+        command "lldb-dap"
+        command-cwd dape-cwd-function
+        :type "lldb"
+        :request "launch"
+        :name "Debug wing"
+        :program "C:/Users/<YOUR_USERNAME>/dev/wing/wing/bin/wing.exe"
+        :cwd "C:/Users/<YOUR_USERNAME>/dev/wing/wing/code"
+        :args []
+        :stopOnEntry nil))))
 
 ;;; -- org: src blocks, directory, gamedev capture templates ---------------
 (with-eval-after-load 'org
   (setq org-src-fontify-natively t)
   (setq org-src-tab-acts-natively t)
   ;; NOTE: update to your actual Windows org directory, e.g. "C:/Users/<YOUR_USERNAME>/org/"
-  (setq org-directory "C:/dev/org/")
   (defvar gamedev-dir (concat org-directory "gamedev/"))
   (setq org-capture-templates
         `(("g" "Gamedev note...")
