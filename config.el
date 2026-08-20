@@ -40,10 +40,6 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(when (eq system-type 'windows-nt)
-        (setq org-directory "C:/dev/org/")
-  (setq org-directory "~/org/"))
-
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `with-eval-after-load' block, otherwise Doom's defaults may override your
 ;; settings. E.g.
@@ -173,6 +169,7 @@
 (setq-hook! '(c-mode-hook c++-mode-hook)
   c-basic-offset 2
   tab-width 2
+  evil-shift-width 2
   indent-tabs-mode nil)
 
 (after! cc-mode
@@ -198,8 +195,7 @@
           (block-open before after)
           (defun-open before after)
           (class-open before after)
-          (inline-open before after)))
-  (setq c-basic-offset 4))
+          (inline-open before after))))
 
 (add-hook 'c-mode-hook #'+my/allman-braces)
 (add-hook 'c++-mode-hook #'+my/allman-braces)
@@ -380,10 +376,12 @@
 
 ;;; -- org: src blocks, directory, gamedev capture templates ---------------
 (with-eval-after-load 'org
+    (when (eq system-type 'windows-nt)
+            (setq org-directory "C:/dev/org/"))
+
   (setq org-src-fontify-natively t)
   (setq org-src-tab-acts-natively t)
-  ;; NOTE: update to your actual Windows org directory, e.g. "C:/Users/<YOUR_USERNAME>/org/"
-  (defvar gamedev-dir (concat org-directory "gamedev/"))
+  (setq gamedev-dir (concat org-directory "gamedev/"))
   (setq org-capture-templates
         `(("g" "Gamedev note...")
           ("ge" "DoomEmacs note" entry
@@ -400,6 +398,9 @@
            "* %?\n%U\n%a\n")
           ("gf" "Phantom note" entry
            (file+headline ,(concat gamedev-dir "phantom.org") "Inbox")
+           "* %?\n%U\n%a\n")
+          ("gF" "Formulas note" entry
+           (file+headline ,(concat gamedev-dir "formulas.org") "Inbox")
            "* %?\n%U\n%a\n")
           ("gi" "CimgGui note" entry
            (file+headline ,(concat gamedev-dir "cimgui.org") "Inbox")
