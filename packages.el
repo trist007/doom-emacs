@@ -52,7 +52,6 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;; (unpin! t)
 (package! djvu)
-
 (package! org-noter)
 (package! glsl-mode)
 (package! ef-themes)

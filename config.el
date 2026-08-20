@@ -372,7 +372,23 @@
         :program "C:/Users/<YOUR_USERNAME>/dev/wing/wing/bin/wing.exe"
         :cwd "C:/Users/<YOUR_USERNAME>/dev/wing/wing/code"
         :args []
-        :stopOnEntry nil))))
+        :stopOnEntry nil)))
+
+  (my/load-vcvars "x64"))
+
+(when (eq system-type 'gnu/linux)
+  (defun wing-compile (target)
+    (let ((default-directory "/home/trist007/dev/wing/wing/code"))
+      (compile (concat "make " target))))
+
+;; Keybindings
+    (map! "M-m" (lambda () (interactive) (wing-compile "game")))
+    (map! :map c-mode-map "<f1>" (cmd! (wing-compile "clean")))
+    (map! :map c-mode-map "<f2>" (cmd! (wing-compile "run")))
+    (map! :map c-mode-map "<f4>" (cmd! (wing-compile "engine")))
+    (map! :map c-mode-map "<f5>" (cmd! (wing-compile "main")))
+    (map! :map c-mode-map "<f6>" (cmd! (wing-compile "imgui")))
+    (map! :map c-mode-map "<f12>" #'+lookup/definition))
 
 ;;; -- org: src blocks, directory, gamedev capture templates ---------------
 (with-eval-after-load 'org
@@ -462,23 +478,6 @@
   :after djvu)
 
 
-;;(setq auth-sources '("~/.authinfo.gpg"))
-;;
-;;(after! circe
-;;  (set-irc-server! "irc.us.libera.chat"
-;;    `(:tls t
-;;      :port 6697
-;;      :nick "trist007"
-;;      :sasl-username "trist007"
-;;      :sasl-password
-;;      (lambda (&rest _)
-;;        (let ((match (car (auth-source-search :host "irc.us.libera.chat"))))
-;;          (if match
-;;              (let ((secret (plist-get match :secret)))
-;;                (if (functionp secret) (funcall secret) secret))
-;;            (error "No auth-source entry for irc.us.libera.chat"))))
-;;      :channels ("##c" "##asm"))))
-;;      
 (setq fixme-modes '(c++-mode c-mode asm-mode emacs-lisp-mode))
 (make-face 'font-lock-fixme-face)
 (make-face 'font-lock-study-face)
@@ -514,9 +513,12 @@
 (map! "M-y" #'+trist/insert-note-comment)
 (map! "M-t" #'+trist/insert-todo-comment)
 
-(my/load-vcvars "x64")
 (add-hook 'eglot-managed-mode-hook
           (lambda () (eglot-inlay-hints-mode -1)))
+
+;; multicursor
+(after! evil-mc
+  (global-evil-mc-mode 1))
 
 (add-to-list 'auto-mode-alist '("\\.hlsl\\'" . c-mode))
 (add-to-list 'auto-mode-alist '("\\.hlsli\\'" . c-mode))
