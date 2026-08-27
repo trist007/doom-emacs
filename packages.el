@@ -55,3 +55,7 @@
 (package! org-noter)
 (package! glsl-mode)
 (package! ef-themes)
+(package! catppuccin-theme)
+(package! fortune-cookie)
+(package! peep-dired)
+(package! woman)

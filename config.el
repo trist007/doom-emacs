@@ -79,7 +79,7 @@
 (setq vc-handled-backends nil)
 
 ;; Define your favorite themes here
-(defvar my-favorite-themes '(doom-one
+(setq my-favorite-themes '(doom-one
                              doom-dracula
                              doom-Iosvkem
                              doom-palenight
@@ -88,8 +88,8 @@
                              doom-outrun-electric
                              doom-winter-is-coming-dark-blue
                              ef-reverie
-                             ef-deuteranopia-light)
-  "List of my favorite themes to choose from.")
+                             catppuccin
+                             ef-deuteranopia-light))
 
 (defun my/choose-favorite-theme ()
   "Read and instantly preview a theme from my-favorite-themes."
@@ -130,6 +130,9 @@
   (forward-line -1))
 
 (map! "M-j" #'my/move-line-down)
+
+;; C-o better-jumper-jump-backward
+;; M-o better-jumper-jump-forward
 
 (set-face-attribute 'default nil :family "Iosevka" :height 220) ; height is 1/10 pt
 
@@ -225,8 +228,39 @@
   (add-hook 'persp-activated-hook
             (lambda (&rest _) (centaur-tabs-headline-match))));;
 
-(when (eq system-type 'windows-nt)
+(defun my/find-corresponding-file ()
+  "Find the file that corresponds to this one."
+  (interactive)
+  (let* ((base-name (file-name-sans-extension (buffer-file-name)))
+         (ext (file-name-extension (buffer-file-name)))
+         (target nil))
+    (cond
+     ((string= ext "c")   (setq target (concat base-name ".h")))
+     ((string= ext "cpp") (setq target (concat base-name ".h")))
+     ((string= ext "cin") (setq target (concat base-name ".hin")))
+     ((string= ext "hin") (setq target (concat base-name ".cin")))
+     ((string= ext "h")   (if (file-exists-p (concat base-name ".c"))
+                              (setq target (concat base-name ".c"))
+                            (setq target (concat base-name ".cpp")))))
+    (if target
+        (find-file target)
+      (user-error "Unable to find a corresponding file"))))
 
+(defun my/find-corresponding-file-other-window ()
+  "Find the file that corresponds to this one in another window."
+  (interactive)
+  (let ((target-file (save-window-excursion
+                       (my/find-corresponding-file)
+                       (buffer-file-name))))
+    (when target-file
+      (find-file-other-window target-file))))
+
+(when (eq system-type 'windows-nt)
+    (use-package! woman
+    :config
+    (setq woman-manpath '("//wsl$/CentOS/usr/share/man"
+                          "//wsl$/CentOS/usr/local/share/man"
+                          "//wsl$/CentOS/usr/share/locale/man")))
   (defun my/load-vcvars (&optional arch)
     "Load MSVC environment variables into Emacs's process-environment."
     (interactive)
@@ -266,7 +300,6 @@
     (require 'emms-player-mpv)
     (add-to-list 'emms-player-list 'emms-player-mpv)
     (setq emms-player-mpv-executable "C:/ProgramData/chocolatey/lib/mpvio.install/tools/mpv.exe"))
-
   (defun my/wing-run (renderer)
     (let* ((default-directory (my/wing-root))
            (buf (get-buffer-create "*wing-run*")))
@@ -295,6 +328,11 @@
     (or (locate-dominating-file default-directory "build.bat")
         "C:/dev/wing/wing/code/")) ;; fallback
 
+  (defun my/wing-bin ()
+    "Find the wing project's code/ dir by walking up from the current buffer."
+    (or (locate-dominating-file default-directory "wing.exe")
+        "C:/dev/wing/wing/bin/")) ;; fallback
+
   (defun my/wing-compile (cmd)
     (let ((default-directory (my/wing-root)))
       (compile cmd)))
@@ -315,34 +353,39 @@
     (define-key map (kbd "M-M")   (lambda () (interactive) (my/wing-compile "build game2")))
     (define-key map (kbd "<f4>")  (lambda () (interactive) (my/wing-compile "build engine")))
     (define-key map (kbd "<S-f4>")(lambda () (interactive) (my/wing-compile "build engine2")))
-    (define-key map (kbd "<f5>")  (lambda () (interactive) (my/wing-compile "build main")))
-    (define-key map (kbd "<f6>")  (lambda () (interactive) (my/wing-compile "build imgui")))
-    (define-key map (kbd "<S-f6>")(lambda () (interactive) (my/wing-compile "build imgui2")))
+    (define-key map (kbd "<f3>")  (lambda () (interactive) (my/wing-compile "build main")))
+    (define-key map (kbd "<f5>")(lambda () (interactive) (my/wing-compile "build platano")))
 
     ;; glbParser
-    (define-key map (kbd "<f9>")  (lambda () (interactive) (my/wing-compile "build glb")))
-    (define-key map (kbd "<S-f9>")  (lambda () (interactive) (my/wing-compile "build glb2")))
-    (define-key map (kbd "<f10>")(lambda () (interactive) (let ((default-directory (my/wing-root)))
-      (compilation-start "glb vulkan" t))))
-    (define-key map (kbd "<S-f10>")(lambda () (interactive) (let ((default-directory (my/wing-root)))
+    (define-key map (kbd "<f6>")  (lambda () (interactive) (my/wing-compile "build glb")))
+    (define-key map (kbd "<S-f6>")  (lambda () (interactive) (my/wing-compile "build glb2")))
+    (define-key map (kbd "<f7>")(lambda () (interactive) (let ((default-directory (my/wing-bin)))
+      (compilation-start "glb.exe" t))))
+    (define-key map (kbd "<S-f7>")(lambda () (interactive) (let ((default-directory (my/wing-bin)))
       (compilation-start "glb d3d11" t))))
 
     ;; Piso
-    (define-key map (kbd "<f7>")
-      (lambda () (interactive)
-        (let ((default-directory (my/piso-root)))
-          (compilation-start "dotnet build piso.csproj -o ../../bin -c Debug" t))))
-
-    (define-key map (kbd "<S-f7>")
+;;    (define-key map (kbd "<f7>")
+;;      (lambda () (interactive)
+;;        (let ((default-directory (my/piso-root)))
+;;          (compilation-start "dotnet build piso.csproj -o ../../bin -c Debug" t))))
+;;
+    (define-key map (kbd "<f8>")
       (lambda () (interactive)
         (let ((default-directory (my/wing-root)))
           (compilation-start "dotnet run --project ../tools/piso/piso.csproj --configuration Debug --no-restore" t))))
 
-    (define-key map (kbd "<f8>")
-      (lambda () (interactive)
-        (let ((default-directory (my/piso-root)))
-          (start-process "devenv-piso" nil my/devenv-path "piso.csproj"))))
+;;    (define-key map (kbd "M-N")
+;;      (lambda () (interactive)
+;;        (let ((default-directory (my/wing-bin)))
+;;          (start-process "devenv-wing"  nil my/devenv-path "wing.exe"))))
+;; 
 
+;;    (define-key map (kbd "M-N")
+;;      (lambda () (interactive)
+;;        (let ((default-directory (my/piso-root)))
+;;          (start-process "devenv-piso" nil my/devenv-path "piso.csproj"))))
+;;
     ;; Bat files
     (define-key map (kbd "<f1>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
       (compilation-start "clean" t))))
@@ -351,11 +394,11 @@
 
     (define-key map (kbd "<S-f2>")  (lambda () (interactive) (my/wing-run "d3d11")))
 
-    (define-key map (kbd "<f3>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
-      (compilation-start "debug vulkan" t))))
+    (define-key map (kbd "M-n")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
+      (compilation-start "debug wing.exe" t))))
 
-    (define-key map (kbd "<S-f3>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
-      (compilation-start "debug d3d11" t))))
+    (define-key map (kbd "M-N")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
+      (compilation-start "debug glb.exe" t))))
 
     ;; vanilla equivalent of Doom's +lookup/definition (uses eglot's xref backend)
     (define-key map (kbd "<f12>") #'xref-find-definitions)))
@@ -387,8 +430,11 @@
     (map! :map c-mode-map "<f2>" (cmd! (wing-compile "run")))
     (map! :map c-mode-map "<f4>" (cmd! (wing-compile "engine")))
     (map! :map c-mode-map "<f5>" (cmd! (wing-compile "main")))
-    (map! :map c-mode-map "<f6>" (cmd! (wing-compile "imgui")))
     (map! :map c-mode-map "<f12>" #'+lookup/definition))
+
+    (map! :map c-mode-map
+        :leader
+        :desc "Toggle header/source window" "m h" #'my/find-corresponding-file-other-window)
 
 ;;; -- org: src blocks, directory, gamedev capture templates ---------------
 (with-eval-after-load 'org
@@ -409,23 +455,32 @@
           ("gp" "SubstancePainter note" entry
            (file+headline ,(concat gamedev-dir "substancepainter.org") "Inbox")
            "* %?\n%U\n%a\n")
-          ("gc" "Collision note" entry
+          ("gP" "Performance note" entry
+           (file+headline ,(concat gamedev-dir "performance.org") "Inbox")
+           "* %?\n%U\n%a\n")
+           ("gc" "Collision note" entry
            (file+headline ,(concat gamedev-dir "collision.org") "Inbox")
            "* %?\n%U\n%a\n")
           ("gf" "Phantom note" entry
            (file+headline ,(concat gamedev-dir "phantom.org") "Inbox")
            "* %?\n%U\n%a\n")
+          ("gr" "Reverse Engineering note" entry
+           (file+headline ,(concat gamedev-dir "reverseengineering.org") "Inbox")
+           "* %?\n%U\n%a\n")
           ("gF" "Formulas note" entry
            (file+headline ,(concat gamedev-dir "formulas.org") "Inbox")
            "* %?\n%U\n%a\n")
-          ("gi" "CimgGui note" entry
-           (file+headline ,(concat gamedev-dir "cimgui.org") "Inbox")
+          ("gi" "MicroUI note" entry
+           (file+headline ,(concat gamedev-dir "microui.org") "Inbox")
            "* %?\n%U\n%a\n")
           ("gs" "Shader note" entry
            (file+headline ,(concat gamedev-dir "shaders.org") "Inbox")
            "* %?\n%U\n%a\n")
           ("gt" "Troubleshooting note" entry
            (file+headline ,(concat gamedev-dir "troubleshooting.org") "Inbox")
+           "* %?\n%U\n%a\n")
+          ("gG" "OpenGL note" entry
+           (file+headline ,(concat gamedev-dir "opengl.org") "Inbox")
            "* %?\n%U\n%a\n")
           ("gv" "Vulkan note" entry
            (file+headline ,(concat gamedev-dir "vulkan.org") "Inbox")
@@ -450,6 +505,9 @@
            "* %?\n%U\n%a\n")
           ("g#" "C# note" entry
            (file+headline ,(concat gamedev-dir "c-sharp.org") "Inbox")
+           "* %?\n%U\n%a\n")
+          ("ga" "Assembly note" entry
+           (file+headline ,(concat gamedev-dir "assembly.org") "Inbox")
            "* %?\n%U\n%a\n")
           ("gh" "Git note" entry
            (file+headline ,(concat gamedev-dir "git.org") "Inbox")
@@ -476,7 +534,6 @@
 
 (use-package! org-noter
   :after djvu)
-
 
 (setq fixme-modes '(c++-mode c-mode asm-mode emacs-lisp-mode))
 (make-face 'font-lock-fixme-face)
@@ -528,4 +585,38 @@
 (add-to-list 'auto-mode-alist '("\\.spvasm\\'" . asm-mode))
 (display-time-mode 1)
 (add-hook 'doom-init-ui-hook
-  (lambda () (load-theme 'ef-maris-dark t)))
+  (lambda () (load-theme 'catppuccin t)))
+
+;;(defun my/load-catppuccin-mocha ()
+;;  (interactive)
+;;  (setq catppuccin-flavor 'mocha)
+;;  (catppuccin-reload))
+
+(defun my/load-catppuccin-flavor ()
+  "Prompt for a Catppuccin flavor and load it."
+  (interactive)
+  (let ((flavor (intern
+                 (completing-read "Catppuccin flavor: "
+                                   '("latte" "frappe" "macchiato" "mocha")
+                                   nil t))))
+    (setq catppuccin-flavor flavor)
+    (catppuccin-reload)))
+
+;; Add the j and k keys to move to next and previous files in peed-dired mode
+(evil-define-key 'normal peep-dired-mode-map
+  (kbd "j") 'peep-dired-next-file
+  (kbd "k") 'peep-dired-prev-file)
+(add-hook 'peep-dired-hook 'evil-normalize-keymaps)
+
+(after! dired
+  (use-package! peep-dired
+    :after dired
+    :config
+    (evil-define-key 'normal peep-dired-mode-map
+      (kbd "j") 'peep-dired-next-file
+      (kbd "k") 'peep-dired-prev-file)
+    (add-hook 'peep-dired-hook 'evil-normalize-keymaps)))
+
+(map! :leader
+      :map dired-mode-map
+      :desc "peep mode" "d p" #'peep-dired)
