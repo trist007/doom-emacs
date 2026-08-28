@@ -256,6 +256,8 @@
       (find-file-other-window target-file))))
 
 (when (eq system-type 'windows-nt)
+  (map! :leader
+        :desc "Open cmd shell" "o T" #'shell)
     (use-package! woman
     :config
     (setq woman-manpath '("//wsl$/CentOS/usr/share/man"

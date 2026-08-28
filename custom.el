@@ -12,6 +12,7 @@
      "7d9c94cc1edddc6162c89c85bbdeed14e5b93a21ec83a55710d6a501bf295cf7"
      "4732feaaeab14f39b62cb922096749d0e9c5d561f6192e13dc2a3d8729d1fd4b"
      "998bc02f2e52205ad06df88a14d53168aef1ec1bbcc6fe2b0cd15fed8e5c8dae" default))
+ '(package-selected-packages '(vterm))
  '(safe-local-variable-values
    '((eval progn
       (let ((root (locate-dominating-file default-directory "build.bat")))
