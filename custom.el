@@ -15,142 +15,193 @@
  '(package-selected-packages '(vterm))
  '(safe-local-variable-values
    '((eval progn
-      (let ((root (locate-dominating-file default-directory "build.bat")))
-       (when (stringp root) (setq-local default-directory root)))
-      (define-minor-mode my-terrain-project-mode
-        "Local keybindings for this project directory."
-        :lighter "" :keymap
-        (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "M-m")
-                      (lambda nil (interactive) (compile "build.bat")))
-          (define-key map (kbd "<f2>")
-                      (lambda nil (interactive)
-                        (start-process "terrain" nil
-                                       (expand-file-name "terrain.exe"
-                                                         default-directory))))
-          (define-key map (kbd "<f3>")
-                      (lambda nil (interactive)
-                        (start-process "raddbg" nil "raddbg.exe"
-                                       (expand-file-name "terrain.exe"
-                                                         default-directory))))
-          map))
-      (my-terrain-project-mode 1))
+           (let ((root (locate-dominating-file default-directory "build.bat")))
+             (when (stringp root) (setq-local default-directory root)))
+           (define-minor-mode my-terrain-project-mode
+             "Local keybindings for this project directory."
+             :lighter "" :keymap
+             (let ((map (make-sparse-keymap)))
+               (define-key map (kbd "M-m")
+                           (lambda nil (interactive) (compile "build.bat")))
+               (define-key map (kbd "<f2>")
+                           (lambda nil (interactive)
+                             (start-process "terrain" nil
+                                            (expand-file-name "terrain.exe"
+                                                              default-directory))))
+               (define-key map (kbd "<f3>")
+                           (lambda nil (interactive)
+                             (start-process "raddbg" nil "raddbg.exe"
+                                            (expand-file-name "terrain.exe"
+                                                              default-directory))))
+               map))
+           (run-with-idle-timer 0 nil #'my-terrain-project-mode 1))
      (eval progn
-      (setq-local default-directory
-                  (locate-dominating-file default-directory "build.bat"))
-      (define-minor-mode my-terrain-project-mode
-        "Local keybindings for this project directory."
-        :lighter "" :keymap
-        (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "M-m")
-                      (lambda nil (interactive) (compile "build.bat")))
-          (define-key map (kbd "<f2>")
-                      (lambda nil (interactive)
-                        (start-process "terrain" nil
-                                       (expand-file-name "terrain.exe"
-                                                         default-directory))))
-          (define-key map (kbd "<f3>")
-                      (lambda nil (interactive)
-                        (start-process "raddbg" nil "raddbg.exe"
-                                       (expand-file-name "terrain.exe"
-                                                         default-directory))))
-          map))
-      (my-terrain-project-mode 1))
+           (let ((root (locate-dominating-file default-directory "build.bat")))
+             (when (stringp root) (setq-local default-directory root)))
+           (define-minor-mode my-terrain-project-mode
+             "Local keybindings for this project directory."
+             :lighter "" :keymap
+             (let ((map (make-sparse-keymap)))
+               (define-key map (kbd "M-m")
+                           (lambda nil (interactive) (compile "build.bat")))
+               (define-key map (kbd "<f2>")
+                           (lambda nil (interactive)
+                             (start-process "terrain" nil
+                                            (expand-file-name "terrain.exe"
+                                                              default-directory))))
+               (define-key map (kbd "<f3>")
+                           (lambda nil (interactive)
+                             (start-process "raddbg" nil "raddbg.exe"
+                                            (expand-file-name "terrain.exe"
+                                                              default-directory))))
+               map))
+           (my-terrain-project-mode 1) (c-set-offset 'substatement-open 0)
+           (c-set-offset 'inline-open 0) (c-set-offset 'block-open 0)
+           (c-set-offset 'brace-list-open 0)
+           (setq-local c-hanging-braces-alist
+                       '((substatement-open before after)
+                         (brace-list-open before after)
+                         (block-open before after) (defun-open before after)
+                         (class-open before after) (inline-open before after))))
      (eval progn
-      (define-minor-mode my-terrain-project-mode
-        "Local keybindings for this project directory."
-        :lighter "" :keymap
-        (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "M-m")
-                      (lambda nil (interactive)
-                        (compile "cielo/code/build.bat")))
-          (define-key map (kbd "<f2>")
-                      (lambda nil (interactive)
-                        (start-process "terrain" nil
-                                       (expand-file-name
-                                        "cielo/code/terrain.exe"
-                                        default-directory))))
-          (define-key map (kbd "<f3>")
-                      (lambda nil (interactive)
-                        (start-process "raddbg" nil "raddbg.exe"
-                                       (expand-file-name
-                                        "cielo/code/terrain.exe"
-                                        default-directory))))
-          map))
-      (my-terrain-project-mode 1))
+           (let ((root (locate-dominating-file default-directory "build.bat")))
+             (when (stringp root) (setq-local default-directory root)))
+           (define-minor-mode my-terrain-project-mode
+             "Local keybindings for this project directory."
+             :lighter "" :keymap
+             (let ((map (make-sparse-keymap)))
+               (define-key map (kbd "M-m")
+                           (lambda nil (interactive) (compile "build.bat")))
+               (define-key map (kbd "<f2>")
+                           (lambda nil (interactive)
+                             (start-process "terrain" nil
+                                            (expand-file-name "terrain.exe"
+                                                              default-directory))))
+               (define-key map (kbd "<f3>")
+                           (lambda nil (interactive)
+                             (start-process "raddbg" nil "raddbg.exe"
+                                            (expand-file-name "terrain.exe"
+                                                              default-directory))))
+               map))
+           (my-terrain-project-mode 1))
      (eval progn
-      (define-minor-mode my-terrain-project-mode
-        "Local keybindings for this project directory."
-        :lighter "" :keymap
-        (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "M-m")
-                      (lambda nil (interactive) (compile "build.bat")))
-          (define-key map (kbd "<f2>")
-                      (lambda nil (interactive)
-                        (start-process "terrain" nil
-                                       (expand-file-name "terrain.exe"
-                                                         default-directory))))
-          (define-key map (kbd "<f3>")
-                      (lambda nil (interactive)
-                        (start-process "raddbg" nil "raddbg.exe"
-                                       (expand-file-name "terrain.exe"
-                                                         default-directory))))
-          map))
-      (my-terrain-project-mode 1))
+           (setq-local default-directory
+                       (locate-dominating-file default-directory "build.bat"))
+           (define-minor-mode my-terrain-project-mode
+             "Local keybindings for this project directory."
+             :lighter "" :keymap
+             (let ((map (make-sparse-keymap)))
+               (define-key map (kbd "M-m")
+                           (lambda nil (interactive) (compile "build.bat")))
+               (define-key map (kbd "<f2>")
+                           (lambda nil (interactive)
+                             (start-process "terrain" nil
+                                            (expand-file-name "terrain.exe"
+                                                              default-directory))))
+               (define-key map (kbd "<f3>")
+                           (lambda nil (interactive)
+                             (start-process "raddbg" nil "raddbg.exe"
+                                            (expand-file-name "terrain.exe"
+                                                              default-directory))))
+               map))
+           (my-terrain-project-mode 1))
      (eval progn
-      (define-minor-mode my-terrain-project-mode
-        "Local keybindings for this project directory."
-        :lighter "" :keymap
-        (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "M-m")
-                      (lambda nil (interactive) (compile "build.bat")))
-          (define-key map (kbd "<f2>")
-                      (lambda nil (interactive)
-                        (start-process "terrain" nil
-                                       (expand-file-name "terrain.exe"
-                                                         default-directory))))
-          map))
-      (my-terrain-project-mode 1))
+           (define-minor-mode my-terrain-project-mode
+             "Local keybindings for this project directory."
+             :lighter "" :keymap
+             (let ((map (make-sparse-keymap)))
+               (define-key map (kbd "M-m")
+                           (lambda nil (interactive)
+                             (compile "cielo/code/build.bat")))
+               (define-key map (kbd "<f2>")
+                           (lambda nil (interactive)
+                             (start-process "terrain" nil
+                                            (expand-file-name
+                                             "cielo/code/terrain.exe"
+                                             default-directory))))
+               (define-key map (kbd "<f3>")
+                           (lambda nil (interactive)
+                             (start-process "raddbg" nil "raddbg.exe"
+                                            (expand-file-name
+                                             "cielo/code/terrain.exe"
+                                             default-directory))))
+               map))
+           (my-terrain-project-mode 1))
      (eval progn
-      (define-minor-mode my-terrain-project-mode
-        "Local keybindings for this project directory."
-        :lighter "" :keymap
-        (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "M-m")
-                      (lambda nil (interactive)
-                        (let
-                            ((default-directory
-                              (file-name-directory
-                               (or buffer-file-name default-directory))))
-                          (compile "build.bat"))))
-          (define-key map (kbd "<f2>")
-                      (lambda nil (interactive)
-                        (let
-                            ((default-directory
-                              (file-name-directory
-                               (or buffer-file-name default-directory))))
-                          (start-process "terrain" nil
-                                         (expand-file-name "terrain.exe"
-                                                           default-directory)))))
-          map))
-      (my-terrain-project-mode 1))
+           (define-minor-mode my-terrain-project-mode
+             "Local keybindings for this project directory."
+             :lighter "" :keymap
+             (let ((map (make-sparse-keymap)))
+               (define-key map (kbd "M-m")
+                           (lambda nil (interactive) (compile "build.bat")))
+               (define-key map (kbd "<f2>")
+                           (lambda nil (interactive)
+                             (start-process "terrain" nil
+                                            (expand-file-name "terrain.exe"
+                                                              default-directory))))
+               (define-key map (kbd "<f3>")
+                           (lambda nil (interactive)
+                             (start-process "raddbg" nil "raddbg.exe"
+                                            (expand-file-name "terrain.exe"
+                                                              default-directory))))
+               map))
+           (my-terrain-project-mode 1))
      (eval progn
-      (local-set-key (kbd "M-m")
-                     (lambda nil (interactive)
-                       (compile
-                        (format "make -C %s" (project-root (project-current))))))
-      (local-set-key (kbd "<f2>")
-                     (lambda nil (interactive)
-                       (async-shell-command
-                        (expand-file-name "renderer.exe"
-                                          (project-root (project-current)))))))
+           (define-minor-mode my-terrain-project-mode
+             "Local keybindings for this project directory."
+             :lighter "" :keymap
+             (let ((map (make-sparse-keymap)))
+               (define-key map (kbd "M-m")
+                           (lambda nil (interactive) (compile "build.bat")))
+               (define-key map (kbd "<f2>")
+                           (lambda nil (interactive)
+                             (start-process "terrain" nil
+                                            (expand-file-name "terrain.exe"
+                                                              default-directory))))
+               map))
+           (my-terrain-project-mode 1))
      (eval progn
-      (local-set-key (kbd "M-m") (lambda nil (interactive) (compile "make")))
-      (local-set-key (kbd "<f2>")
-                     (lambda nil (interactive)
-                       (async-shell-command
-                        (expand-file-name "renderer.exe"
-                                          (project-root (project-current))))))))))
+           (define-minor-mode my-terrain-project-mode
+             "Local keybindings for this project directory."
+             :lighter "" :keymap
+             (let ((map (make-sparse-keymap)))
+               (define-key map (kbd "M-m")
+                           (lambda nil (interactive)
+                             (let
+                                 ((default-directory
+                                   (file-name-directory
+                                    (or buffer-file-name default-directory))))
+                               (compile "build.bat"))))
+               (define-key map (kbd "<f2>")
+                           (lambda nil (interactive)
+                             (let
+                                 ((default-directory
+                                   (file-name-directory
+                                    (or buffer-file-name default-directory))))
+                               (start-process "terrain" nil
+                                              (expand-file-name "terrain.exe"
+                                                                default-directory)))))
+               map))
+           (my-terrain-project-mode 1))
+     (eval progn
+           (local-set-key (kbd "M-m")
+                          (lambda nil (interactive)
+                            (compile
+                             (format "make -C %s"
+                                     (project-root (project-current))))))
+           (local-set-key (kbd "<f2>")
+                          (lambda nil (interactive)
+                            (async-shell-command
+                             (expand-file-name "renderer.exe"
+                                               (project-root (project-current)))))))
+     (eval progn
+           (local-set-key (kbd "M-m")
+                          (lambda nil (interactive) (compile "make")))
+           (local-set-key (kbd "<f2>")
+                          (lambda nil (interactive)
+                            (async-shell-command
+                             (expand-file-name "renderer.exe"
+                                               (project-root (project-current))))))))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -256,6 +256,8 @@
       (find-file-other-window target-file))))
 
 (when (eq system-type 'windows-nt)
+  (setq racket-program "C:\\Program Files\\Racket\\Racket.exe")
+
   (map! :leader
         :desc "Open cmd shell" "o T" #'shell)
     (use-package! woman
@@ -298,10 +300,28 @@
 
   (setq epg-gpg-program "C:/msys64/usr/bin/gpg.exe")
 
-  (after! emms
-    (require 'emms-player-mpv)
-    (add-to-list 'emms-player-list 'emms-player-mpv)
-    (setq emms-player-mpv-executable "C:/ProgramData/chocolatey/lib/mpvio.install/tools/mpv.exe"))
+  ;; --- EMMS base setup ---
+(after! emms
+  (emms-all)
+  (emms-default-players)
+
+  ;; Force MPV as the primary player
+  (setq emms-player-list '(emms-player-mpv))
+
+  ;; Configure MPV to stream YouTube via yt-dlp
+  (setq emms-player-mpv-parameters
+        '("--quiet"
+          "--really-quiet"
+          "--ytdl-format=bestaudio/best"
+          "--script-opts=ytdl_hook-ytdl_path=yt-dlp")))
+
+;; --- mpvi on top of EMMS/MPV ---
+(use-package! mpvi
+  :after emms
+  :config
+  (setq mpvi-mpv-ontop-p t)
+  (setq mpvi-mpv-border-p t))
+
   (defun my/wing-run (renderer)
     (let* ((default-directory (my/wing-root))
            (buf (get-buffer-create "*wing-run*")))
@@ -526,13 +546,16 @@
 (use-package! djvu)
 
 (use-package! glsl-mode
-  :mode (("\\.glsl\\'" . glsl-mode)
-         ("\\.vert\\'" . glsl-mode)
-         ("\\.frag\\'" . glsl-mode)
-         ("\\.geom\\'" . glsl-mode)
-         ("\\.comp\\'" . glsl-mode)
-         ("\\.tesc\\'" . glsl-mode)
-         ("\\.tese\\'" . glsl-mode)))
+  :defer t
+  :init
+  (dolist (pattern '("\\.glsl\\'" 
+                     "\\.vert\\'" 
+                     "\\.frag\\'" 
+                     "\\.geom\\'" 
+                     "\\.comp\\'" 
+                     "\\.tesc\\'" 
+                     "\\.tese\\'"))
+    (add-to-list 'auto-mode-alist (cons pattern 'glsl-mode))))
 
 (use-package! org-noter
   :after djvu)
@@ -587,7 +610,7 @@
 (add-to-list 'auto-mode-alist '("\\.spvasm\\'" . asm-mode))
 (display-time-mode 1)
 (add-hook 'doom-init-ui-hook
-  (lambda () (load-theme 'catppuccin t)))
+  (lambda () (load-theme 'doom-tokyo-night t)))
 
 ;;(defun my/load-catppuccin-mocha ()
 ;;  (interactive)
@@ -622,3 +645,16 @@
 (map! :leader
       :map dired-mode-map
       :desc "peep mode" "d p" #'peep-dired)
+
+;; an attempt to fix the issue in org-capture where cursor goes to the beginning of the line
+(add-hook 'org-capture-mode-hook
+          (lambda ()
+            (setq-local apheleia-mode nil) ; Disables common auto-formatters
+            (setq-local lsp-enable-file-watchers nil)))
+
+(defun my-woman (topic)
+  "Look up topic with woman in one shot"
+  (interactive "sWoman topic: ")
+  (woman topic))
+
+(global-set-key (kbd "C-c w") #'my-woman)

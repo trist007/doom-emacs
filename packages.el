@@ -59,3 +59,5 @@
 (package! fortune-cookie)
 (package! peep-dired)
 (package! woman)
+(package! mpvi)
+(package! spacemacs-theme)
