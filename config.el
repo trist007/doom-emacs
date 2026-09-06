@@ -78,6 +78,10 @@
 
 (setq vc-handled-backends nil)
 
+(when (eq system-type 'gnu/linux)
+  (setq doom-font (font-spec :family "JetBrainsMono Nerd Font" :size 14)))
+
+
 ;; Define your favorite themes here
 (setq my-favorite-themes '(doom-one
                              doom-dracula
@@ -166,8 +170,15 @@
 (global-set-key (kbd "C-,") #'my/other-frame-c-mode)
 (global-set-key (kbd "C-c c") #'org-capture)
 
-(map! :n "C-<tab>" #'centaur-tabs-forward
-      :n "C-S-<tab>" #'centaur-tabs-backward)
+
+(if (eq system-type 'windows-nt)
+    (map! :n "C-<tab>" #'centaur-tabs-forward
+          :n "C-S-<tab>" #'centaur-tabs-backward)
+  (map! :n "C-<tab>" #'centaur-tabs-forward
+        :n "C-S-<tab>" #'centaur-tabs-backward
+        :n "C-<iso-lefttab>" #'centaur-tabs-backward
+        :n "C-S-<iso-lefttab>" #'centaur-tabs-backward))
+
 
 (setq-hook! '(c-mode-hook c++-mode-hook)
   c-basic-offset 2
