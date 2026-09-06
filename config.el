@@ -460,8 +460,10 @@
 
 ;;; -- org: src blocks, directory, gamedev capture templates ---------------
 (with-eval-after-load 'org
-    (when (eq system-type 'windows-nt)
-            (setq org-directory "C:/dev/org/"))
+    (if (eq system-type 'windows-nt)
+            (setq org-directory "C:/dev/org/")
+        (setq org-directory "~/dev/org/"))
+
 
   (setq org-src-fontify-natively t)
   (setq org-src-tab-acts-natively t)
