@@ -61,3 +61,4 @@
 (package! woman)
 (package! mpvi)
 (package! spacemacs-theme)
+(package! clang-format)

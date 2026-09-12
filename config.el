@@ -254,7 +254,9 @@
                               (setq target (concat base-name ".c"))
                             (setq target (concat base-name ".cpp")))))
     (if target
-        (find-file target)
+        (progn
+          (select-window (split-window-right))
+        (find-file target))
       (user-error "Unable to find a corresponding file"))))
 
 (defun my/find-corresponding-file-other-window ()
@@ -490,6 +492,9 @@
           ("gp" "SubstancePainter note" entry
            (file+headline ,(concat gamedev-dir "substancepainter.org") "Inbox")
            "* %?\n%U\n%a\n")
+          ("gx" "Graphics note" entry
+           (file+headline ,(concat gamedev-dir "graphics.org") "Inbox")
+           "* %?\n%U\n%a\n")
           ("gP" "Performance note" entry
            (file+headline ,(concat gamedev-dir "performance.org") "Inbox")
            "* %?\n%U\n%a\n")
@@ -662,8 +667,7 @@
 ;; an attempt to fix the issue in org-capture where cursor goes to the beginning of the line
 (add-hook 'org-capture-mode-hook
           (lambda ()
-            (setq-local apheleia-mode nil) ; Disables common auto-formatters
-            (setq-local lsp-enable-file-watchers nil)))
+            (flyspell-mode -1)))
 
 (defun my-woman (topic)
   "Look up topic with woman in one shot"
@@ -671,3 +675,8 @@
   (woman topic))
 
 (global-set-key (kbd "C-c w") #'my-woman)
+
+;; emacs blocks until keystroke, probably async process hit ctrl-g a few times to get backtrace
+;;(setq debug-on-quit t)
+(use-package clang-format
+  :ensure t)
