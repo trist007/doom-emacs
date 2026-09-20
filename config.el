@@ -439,6 +439,7 @@
     (define-key map (kbd "<f12>") #'xref-find-definitions)))
 
   (with-eval-after-load 'dape
+    ;; wing
     (add-to-list 'dape-configs
       `(wing-debug
         modes (c-mode c++-mode)
@@ -447,10 +448,25 @@
         :type "lldb"
         :request "launch"
         :name "Debug wing"
-        :program "C:/Users/<YOUR_USERNAME>/dev/wing/wing/bin/wing.exe"
-        :cwd "C:/Users/<YOUR_USERNAME>/dev/wing/wing/code"
+        :program "/dev/wing/wing/bin/wing.exe"
+        :cwd "/dev/wing/wing/code"
         :args []
-        :stopOnEntry nil)))
+        :stopOnEntry nil))
+
+    ;; limpio
+    (add-to-list 'dape-configs
+      `(limpio-debug
+        modes (c-mode c++-mode)
+        command "lldb-dap"
+        command-cwd dape-cwd-function
+        :type "lldb"
+        :request "launch"
+        :name "Debug limpio"
+        :program "/dev/limpio/limpio/code/parser.exe"
+        :cwd "/dev/limpio/limpio/code"
+        :args ["parser.c"]
+        :stopOnEntry nil))
+    )
 
   (my/load-vcvars "x64"))
 
@@ -540,8 +556,11 @@
           ("gw" "Wing note" entry
            (file+headline ,(concat gamedev-dir "wing.org") "Inbox")
            "* %?\n%U\n%a\n**Tasks:** [/]\n  - [ ] ")
-          ("g+" "C/C++ note" entry
+          ("gC" "C note" entry
            (file+headline ,(concat gamedev-dir "c.org") "Inbox")
+           "* %?\n%U\n%a\n")
+          ("g+" "C++ note" entry
+           (file+headline ,(concat gamedev-dir "cpp.org") "Inbox")
            "* %?\n%U\n%a\n")
           ("g#" "C# note" entry
            (file+headline ,(concat gamedev-dir "c-sharp.org") "Inbox")
@@ -627,8 +646,21 @@
 ;; SPIR-V disassembly (.spvasm, from spirv-dis) — asm-mode is closest fit
 (add-to-list 'auto-mode-alist '("\\.spvasm\\'" . asm-mode))
 (display-time-mode 1)
-(add-hook 'doom-init-ui-hook
-  (lambda () (load-theme 'doom-tokyo-night t)))
+
+;; set doom-theme here
+;;(add-hook 'doom-init-ui-hook
+;;  (lambda () (load-theme 'leuven t)))
+;;
+
+(setq doom-theme 'leuven)
+
+;; make the background of leuven a little more dim
+(custom-set-faces!
+  '(default :background "#efece2")
+  '(fringe :background "#efece2")
+  '(hl-line :background "#e6e2d5")
+  '(line-number :background "#efece2")
+  '(line-number-current-line :background "#e6e2d5"))
 
 ;;(defun my/load-catppuccin-mocha ()
 ;;  (interactive)
@@ -687,3 +719,22 @@
 
 (add-hook 'c-mode-common-hook
           (lambda () (c-toggle-comment-style -1)))
+ 
+;; C-k kill-line will work in minibuffer
+(define-key minibuffer-local-map (kbd "C-k") #'delete-minibuffer-contents)
+
+;; just for the doom splash screen
+(defun my/dark-buffer ()
+  "Make the current buffer dark without changing the theme."
+  (interactive)
+  (dolist (spec '((default                  :background "#282c34" :foreground "#bbc2cf")
+                  (fringe                   :background "#282c34")
+                  (hl-line                  :background "#23272e")
+                  (line-number              :background "#282c34" :foreground "#5b6268")
+                  (font-lock-keyword-face   :background "#282c34" :foreground "#c678dd")
+                  (font-lock-type-face      :background "#282c34" :foreground "#c678dd")
+                  (line-number-current-line :background "#282c34" :foreground "#bbc2cf")))
+    (apply #'face-remap-add-relative spec)))
+
+;; Auto-apply to the Doom dashboard (the splash screen):
+(add-hook '+doom-dashboard-mode-hook #'my/dark-buffer)

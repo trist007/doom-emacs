@@ -62,3 +62,4 @@
 (package! mpvi)
 (package! spacemacs-theme)
 (package! clang-format)
+(package! dape)
