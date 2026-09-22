@@ -125,6 +125,11 @@
   (forward-line -2))
 
 (map! "M-k" #'my/move-line-up)
+(map! :n "C-a" #'evil-beginning-of-line)
+(map! :n "C-e" #'evil-end-of-line)
+
+(map! :map (c-mode-map c++-mode-map)
+      :n "C-S-a" #'align)
 
 (defun my/move-line-down ()
   "Move the current line down one line."
@@ -732,10 +737,3 @@
                   (line-number-current-line :background "#282c34" :foreground "#bbc2cf")))
     (apply #'face-remap-add-relative spec)))
 (run-with-idle-timer .1 nil #'my/dark-buffer)
-
-(after! <the-minor-mode>
-  (map! :map <the-minor-mode>-map
-        :n "C-a" #'evil-beginning-of-line))
-
-(map! :map (c-mode-map c++-mode-map)
-      :n "C-S-a" #'align)
