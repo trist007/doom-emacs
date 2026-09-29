@@ -670,17 +670,17 @@
   '(diredfl-exec-priv :foreground "#00ff00")
 
   ;; marginalia
-   '(marginalia-file-priv-read  :foreground "#1e90ff")
+  '(marginalia-file-priv-read  :foreground "#1e90ff")
   '(marginalia-file-priv-write :foreground "#a020f0")
   '(marginalia-file-priv-exec  :foreground "#00ff00")
   '(marginalia-number          :foreground "#ba55d3")
   '(marginalia-size            :foreground "#ba55d3") 
 
   ;; other misc
-  '(doom-dashboard-footer :foreground "#0000ff")
-  '(font-lock-function-name-face :foreground "#0000ff")
-  '(font-lock-string-face :foreground "#0000ff")
-  '(doom-dashboard-footer-icon :foreground "#0000ff")
+  ;;'(doom-dashboard-footer :foreground "#0000ff")
+  ;;'(font-lock-function-name-face :foreground "#0000ff")
+  ;;'(font-lock-string-face :foreground "#0000ff")
+  ;;'(doom-dashboard-footer-icon :foreground "#0000ff")
 
   ;; magit
   '(magit-branch-remote :foreground "#9370db")
