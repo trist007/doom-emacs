@@ -662,19 +662,22 @@
 (custom-set-faces!
   '(eglot-semantic-defaultLibrary :foreground "#ba55d3")
   '(eglot-semantic-readonly :foreground "#adff2f")
+
+  ;; dired
   '(diredfl-number :foreground "#ba55d3")
-  '(diredfl-read-priv :foreground "#0000ff")
+  '(diredfl-read-priv :foreground "#1e90ff")
   '(diredfl-write-priv :foreground "#a020f0")
   '(diredfl-exec-priv :foreground "#00ff00")
-  '(+dashboard-menu-title :foreground "a020f0")
+
+  ;; other misc
   '(doom-dashboard-footer :foreground "#0000ff")
   '(font-lock-function-name-face :foreground "#0000ff")
   '(font-lock-string-face :foreground "#0000ff")
   '(doom-dashboard-footer-icon :foreground "#0000ff")
-  '(+dashboard-menu-desc :foreground "#0000ff"))
-;; eglot-semantic-function eglot-semantic-defaultLibrary
-;; eglot-semantic-parameter eglot-semantic-readonly)
 
+  ;; doom splash screen
+  '(+dashboard-menu-title :foreground "#0000ff")
+  '(+dashboard-menu-desc :foreground "#a020f0"))
 
 ;; make the background of leuven a little more dim
 ;;(custom-set-faces!
