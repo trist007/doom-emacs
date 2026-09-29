@@ -32,7 +32,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-;; (setq doom-theme 'doom-wilmersdorf)
+;;(setq doom-theme 'doom-tokyo-night)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -552,6 +552,9 @@
           ("gm" "Math note" entry
            (file+headline ,(concat gamedev-dir "math.org") "Inbox")
            "* %?\n%U\n%a\n")
+          ("gD" "DOS note" entry
+           (file+headline ,(concat gamedev-dir "dosdev.org") "Inbox")
+           "* %?\n%U\n%a\n")
           ("go" "Org note" entry
            (file+headline ,(concat gamedev-dir "orgmode.org") "Inbox")
            "* %?\n%U\n%a\n")
@@ -654,30 +657,47 @@
 ;;  (lambda () (load-theme 'leuven t)))
 ;;
 
-(setq doom-theme 'leuven)
+(setq fancy-splash-image "C:/Users/Tristan/.config/doom/doom-emacs-slant-out-color.png")
+(setq doom-theme 'doom-tokyo-night)
+(custom-set-faces!
+  '(eglot-semantic-defaultLibrary :foreground "#ba55d3")
+  '(eglot-semantic-readonly :foreground "#adff2f")
+  '(diredfl-number :foreground "#ba55d3")
+  '(diredfl-read-priv :foreground "#0000ff")
+  '(diredfl-write-priv :foreground "#a020f0")
+  '(diredfl-exec-priv :foreground "#00ff00")
+  '(+dashboard-menu-title :foreground "a020f0")
+  '(doom-dashboard-footer :foreground "#0000ff")
+  '(font-lock-function-name-face :foreground "#0000ff")
+  '(font-lock-string-face :foreground "#0000ff")
+  '(doom-dashboard-footer-icon :foreground "#0000ff")
+  '(+dashboard-menu-desc :foreground "#0000ff"))
+;; eglot-semantic-function eglot-semantic-defaultLibrary
+;; eglot-semantic-parameter eglot-semantic-readonly)
+
 
 ;; make the background of leuven a little more dim
-(custom-set-faces!
-  '(default :background "#efece2")
-  '(fringe :background "#efece2")
-  '(hl-line :background "#e6e2d5")
-  '(line-number :background "#efece2")
-  '(line-number-current-line :background "#e6e2d5"))
-
-;;(defun my/load-catppuccin-mocha ()
+;;(custom-set-faces!
+;;  '(default :background "#efece2")
+;;  '(fringe :background "#efece2")
+;;  '(hl-line :background "#e6e2d5")
+;;  '(line-number :background "#efece2")
+;;  '(line-number-current-line :background "#e6e2d5"))
+;;
+;;;;(defun my/load-catppuccin-mocha ()
+;;;;  (interactive)
+;;;;  (setq catppuccin-flavor 'mocha)
+;;;;  (catppuccin-reload))
+;;
+;;(defun my/load-catppuccin-flavor ()
+;;  "Prompt for a Catppuccin flavor and load it."
 ;;  (interactive)
-;;  (setq catppuccin-flavor 'mocha)
-;;  (catppuccin-reload))
-
-(defun my/load-catppuccin-flavor ()
-  "Prompt for a Catppuccin flavor and load it."
-  (interactive)
-  (let ((flavor (intern
-                 (completing-read "Catppuccin flavor: "
-                                   '("latte" "frappe" "macchiato" "mocha")
-                                   nil t))))
-    (setq catppuccin-flavor flavor)
-    (catppuccin-reload)))
+;;  (let ((flavor (intern
+;;                 (completing-read "Catppuccin flavor: "
+;;                                   '("latte" "frappe" "macchiato" "mocha")
+;;                                   nil t))))
+;;    (setq catppuccin-flavor flavor)
+;;    (catppuccin-reload)))
 
 ;; Add the j and k keys to move to next and previous files in peed-dired mode
 (evil-define-key 'normal peep-dired-mode-map
@@ -726,14 +746,14 @@
 (define-key minibuffer-local-map (kbd "C-k") #'delete-minibuffer-contents)
 
 ;; darken doom splash screen
-(defun my/dark-buffer ()
-  "Make the current buffer dark without changing the theme."
-  (dolist (spec '((default                  :background "#282c34" :foreground "#bbc2cf")
-                  (fringe                   :background "#282c34")
-                  (hl-line                  :background "#23272e")
-                  (line-number              :background "#282c34" :foreground "#5b6268")
-                  (font-lock-keyword-face   :background "#282c34" :foreground "#c678dd")
-                  (font-lock-type-face      :background "#282c34" :foreground "#c678dd")
-                  (line-number-current-line :background "#282c34" :foreground "#bbc2cf")))
-    (apply #'face-remap-add-relative spec)))
-(run-with-idle-timer .1 nil #'my/dark-buffer)
+;;(defun my/dark-buffer ()
+;;  "Make the current buffer dark without changing the theme."
+;;  (dolist (spec '((default                  :background "#282c34" :foreground "#bbc2cf")
+;;                  (fringe                   :background "#282c34")
+;;                  (hl-line                  :background "#23272e")
+;;                  (line-number              :background "#282c34" :foreground "#5b6268")
+;;                  (font-lock-keyword-face   :background "#282c34" :foreground "#c678dd")
+;;                  (font-lock-type-face      :background "#282c34" :foreground "#c678dd")
+;;                  (line-number-current-line :background "#282c34" :foreground "#bbc2cf")))
+;;    (apply #'face-remap-add-relative spec)))
+;;(run-with-idle-timer .1 nil #'my/dark-buffer)
