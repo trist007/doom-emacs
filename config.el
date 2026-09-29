@@ -669,6 +669,13 @@
   '(diredfl-write-priv :foreground "#a020f0")
   '(diredfl-exec-priv :foreground "#00ff00")
 
+  ;; marginalia
+   '(marginalia-file-priv-read  :foreground "#1e90ff")
+  '(marginalia-file-priv-write :foreground "#a020f0")
+  '(marginalia-file-priv-exec  :foreground "#00ff00")
+  '(marginalia-number          :foreground "#ba55d3")
+  '(marginalia-size            :foreground "#ba55d3") 
+
   ;; other misc
   '(doom-dashboard-footer :foreground "#0000ff")
   '(font-lock-function-name-face :foreground "#0000ff")
