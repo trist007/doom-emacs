@@ -675,9 +675,16 @@
   '(font-lock-string-face :foreground "#0000ff")
   '(doom-dashboard-footer-icon :foreground "#0000ff")
 
+  ;; magit
+  '(magit-branch-remote :foreground "#9370db")
+  '(magit-branch-current :foreground "#9370db")
+  '(magit-branch-local :foreground "#ff0000")
+
   ;; doom splash screen
   '(+dashboard-menu-title :foreground "#0000ff")
   '(+dashboard-menu-desc :foreground "#a020f0"))
+
+
 
 ;; make the background of leuven a little more dim
 ;;(custom-set-faces!
