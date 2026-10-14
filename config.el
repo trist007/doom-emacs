@@ -585,7 +585,12 @@
 ;;(remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-pushremote)
 (remove-hook 'dired-mode-hook #'dired-omit-mode)
 
-(use-package! djvu)
+
+(if (eq system-type 'darwin)
+    (setq ns-use-native-fullscreen nil)
+    (use-package! djvu
+      :mode ("\\.djvu\\'" . djvu-mode))
+  (use-package! djvu))
 
 (use-package! glsl-mode
   :defer t
@@ -657,7 +662,10 @@
 ;;  (lambda () (load-theme 'leuven t)))
 ;;
 
-(setq fancy-splash-image "C:/Users/Tristan/.config/doom/doom-emacs-slant-out-color.png")
+(if (eq system-type 'darwin)
+    (setq fancy-splash-image "/Users/trist007/.config/doom/doom-emacs-slant-out-color.png")
+ (setq fancy-splash-image "C:/Users/Tristan/.config/doom/doom-emacs-slant-out-color.png"))
+
 (setq doom-theme 'doom-tokyo-night)
 (custom-set-faces!
   '(eglot-semantic-defaultLibrary :foreground "#ba55d3")
@@ -749,8 +757,14 @@
 
 ;; emacs blocks until keystroke, probably async process hit ctrl-g a few times to get backtrace
 ;;(setq debug-on-quit t)
-(use-package clang-format
-  :ensure t)
+(if (eq system-type 'darwin)
+    (use-package! clang-format
+     :commands (clang-format clang-format-buffer clang-format-region)
+     :config
+     (setq clang-format-style "file"))
+    (use-package clang-format
+    :ensure t))
+
 
 (map! :n "C-/" #'comment-line
       :i "C-/" #'comment-line
