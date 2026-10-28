@@ -65,3 +65,5 @@
 (package! dape)
 (package! hlsl-mode
   :recipe (:host github :repo "xeechou/hlsl-mode.el"))
+(package! slang-mode
+  :recipe (:host github :repo "k1ngst0m/slang-mode"))

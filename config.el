@@ -164,7 +164,7 @@
       (let* ((f (nth (mod i n) frames))
              (buf (window-buffer (frame-selected-window f))))
         (when (with-current-buffer buf
-              (or (derived-mode-p 'c-mode 'c++-mode 'asm-mode 'dired-mode 'glsl-mode 'hlsl-mode)
+              (or (derived-mode-p 'c-mode 'c++-mode 'asm-mode 'dired-mode 'emacs-lisp-mode 'glsl-mode 'hlsl-mode 'slang-mode)
                   (derived-mode-p 'compilation-mode)))
           (setq found f)))
       (setq i (1+ i)))
@@ -656,10 +656,6 @@
 (after! evil-mc
   (global-evil-mc-mode 1))
 
-(add-to-list 'auto-mode-alist '("\\.hlsl\\'" . c-mode))
-(add-to-list 'auto-mode-alist '("\\.hlsli\\'" . c-mode))
-(add-to-list 'auto-mode-alist '("\\.slang\\'" . c-mode))
-
 ;; SPIR-V disassembly (.spvasm, from spirv-dis) — asm-mode is closest fit
 (add-to-list 'auto-mode-alist '("\\.spvasm\\'" . asm-mode))
 (display-time-mode 1)
@@ -805,3 +801,8 @@
          ("\\.cs\\'"   . hlsl-mode)   ; compute
          ("\\.ms\\'"   . hlsl-mode)   ; mesh
          ("\\.as\\'"   . hlsl-mode))) ; amplification
+
+(use-package! slang-mode
+  :mode (("\\.slang\\'"  . slang-mode)
+         ("\\.sl\\'"     . slang-mode)
+         ("\\.slangh\\'" . slang-mode)))
