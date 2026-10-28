@@ -164,7 +164,7 @@
       (let* ((f (nth (mod i n) frames))
              (buf (window-buffer (frame-selected-window f))))
         (when (with-current-buffer buf
-              (or (derived-mode-p 'c-mode 'c++-mode 'asm-mode 'dired-mode)
+              (or (derived-mode-p 'c-mode 'c++-mode 'asm-mode 'dired-mode 'glsl-mode 'hlsl-mode)
                   (derived-mode-p 'compilation-mode)))
           (setq found f)))
       (setq i (1+ i)))
@@ -388,8 +388,10 @@
     ;; Build
     (define-key map (kbd "M-m")   (lambda () (interactive) (my/wing-compile "build game")))
     (define-key map (kbd "M-M")   (lambda () (interactive) (my/wing-compile "build game2")))
+    (define-key map (kbd "C-M-m")   (lambda () (interactive) (my/wing-compile "build game3")))
     (define-key map (kbd "<f4>")  (lambda () (interactive) (my/wing-compile "build engine")))
     (define-key map (kbd "<S-f4>")(lambda () (interactive) (my/wing-compile "build engine2")))
+    (define-key map (kbd "<S-f5>")(lambda () (interactive) (my/wing-compile "build engine3")))
     (define-key map (kbd "<f3>")  (lambda () (interactive) (my/wing-compile "build main")))
     (define-key map (kbd "<f5>")(lambda () (interactive) (my/wing-compile "build platano")))
 
@@ -430,6 +432,8 @@
     (define-key map (kbd "<f2>")  (lambda () (interactive) (my/wing-run "vulkan")))
 
     (define-key map (kbd "<S-f2>")  (lambda () (interactive) (my/wing-run "d3d11")))
+
+    (define-key map (kbd "<S-f1>")  (lambda () (interactive) (my/wing-run "opengl")))
 
     (define-key map (kbd "M-n")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
       (compilation-start "debug wing.exe" t))))
@@ -564,6 +568,9 @@
           ("gC" "C note" entry
            (file+headline ,(concat gamedev-dir "c.org") "Inbox")
            "* %?\n%U\n%a\n")
+          ("gA" "Advanced C note" entry
+           (file+headline ,(concat gamedev-dir "advanced-c.org") "Inbox")
+           "* %?\n%U\n%a\n")
           ("g+" "C++ note" entry
            (file+headline ,(concat gamedev-dir "cpp.org") "Inbox")
            "* %?\n%U\n%a\n")
@@ -662,10 +669,8 @@
 ;;  (lambda () (load-theme 'leuven t)))
 ;;
 
-(if (eq system-type 'darwin)
-    (setq fancy-splash-image "/Users/trist007/.config/doom/doom-emacs-slant-out-color.png")
- (setq fancy-splash-image "C:/Users/Tristan/.config/doom/doom-emacs-slant-out-color.png"))
-
+(setq fancy-splash-image "C:/Users/Tristan/.config/doom/doom-emacs-slant-out-color.png")
+;;(setq fancy-splash-image "C:/Users/Tristan/.config/doom/doom-emacs.png")
 (setq doom-theme 'doom-tokyo-night)
 (custom-set-faces!
   '(eglot-semantic-defaultLibrary :foreground "#ba55d3")
@@ -788,3 +793,15 @@
 ;;                  (line-number-current-line :background "#282c34" :foreground "#bbc2cf")))
 ;;    (apply #'face-remap-add-relative spec)))
 ;;(run-with-idle-timer .1 nil #'my/dark-buffer)
+
+(use-package! hlsl-mode
+  :mode (("\\.hlsl\\'" . hlsl-mode)
+         ("\\.fx\\'"   . hlsl-mode)
+         ("\\.fxh\\'"  . hlsl-mode)
+         ("\\.vs\\'"   . hlsl-mode)
+         ("\\.ps\\'"   . hlsl-mode)
+         ("\\.hs\\'"   . hlsl-mode)   ; hull
+         ("\\.ds\\'"   . hlsl-mode)   ; domain
+         ("\\.cs\\'"   . hlsl-mode)   ; compute
+         ("\\.ms\\'"   . hlsl-mode)   ; mesh
+         ("\\.as\\'"   . hlsl-mode))) ; amplification

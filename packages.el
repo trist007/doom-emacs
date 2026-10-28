@@ -63,3 +63,5 @@
 (package! spacemacs-theme)
 (package! clang-format)
 (package! dape)
+(package! hlsl-mode
+  :recipe (:host github :repo "xeechou/hlsl-mode.el"))
