@@ -164,7 +164,7 @@
       (let* ((f (nth (mod i n) frames))
              (buf (window-buffer (frame-selected-window f))))
         (when (with-current-buffer buf
-              (or (derived-mode-p 'c-mode 'c++-mode 'asm-mode 'dired-mode 'emacs-lisp-mode 'glsl-mode 'hlsl-mode 'slang-mode)
+              (or (derived-mode-p 'c-mode 'c++-mode 'asm-mode 'dired-mode 'emacs-lisp-mode 'glsl-mode 'hlsl-mode 'slang-mode 'org-mode)
                   (derived-mode-p 'compilation-mode)))
           (setq found f)))
       (setq i (1+ i)))
@@ -393,6 +393,7 @@
     (define-key map (kbd "<S-f4>")(lambda () (interactive) (my/wing-compile "build engine2")))
     (define-key map (kbd "<S-f5>")(lambda () (interactive) (my/wing-compile "build engine3")))
     (define-key map (kbd "<f3>")  (lambda () (interactive) (my/wing-compile "build main")))
+    (define-key map (kbd "<S-f3>")  (lambda () (interactive) (my/wing-compile "build main2")))
     (define-key map (kbd "<f5>")(lambda () (interactive) (my/wing-compile "build platano")))
 
     ;; glbParser
@@ -429,11 +430,11 @@
     (define-key map (kbd "<f1>")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
       (compilation-start "clean" t))))
 
-    (define-key map (kbd "<f2>")  (lambda () (interactive) (my/wing-run "vulkan")))
+    (define-key map (kbd "<f2>")  (lambda () (interactive) (my/wing-run "d3d11")))
 
-    (define-key map (kbd "<S-f2>")  (lambda () (interactive) (my/wing-run "d3d11")))
+    (define-key map (kbd "<S-f2>")  (lambda () (interactive) (my/wing-run "vulkan")))
 
-    (define-key map (kbd "<S-f1>")  (lambda () (interactive) (my/wing-run "opengl")))
+    ;; (define-key map (kbd "<S-f1>")  (lambda () (interactive) (my/wing-run "opengl")))
 
     (define-key map (kbd "M-n")  (lambda () (interactive) (let ((default-directory (my/wing-root)))
       (compilation-start "debug wing.exe" t))))
@@ -806,3 +807,6 @@
   :mode (("\\.slang\\'"  . slang-mode)
          ("\\.sl\\'"     . slang-mode)
          ("\\.slangh\\'" . slang-mode)))
+
+(add-to-list 'auto-mode-alist '("Doxyfile\\'" . conf-unix-mode))
+(add-to-list 'auto-mode-alist '("\\.doxyfile\\'" . conf-unix-mode))
