@@ -686,6 +686,9 @@
   '(marginalia-number          :foreground "#ba55d3")
   '(marginalia-size            :foreground "#ba55d3") 
 
+  ;; doxygen keywoards
+  '(font-lock-doc-markup-face :foreground "#ff0000"))
+  ;;'(font-lock-doc-face :foreground "#ba55d3"))
   ;; other misc
   ;;'(doom-dashboard-footer :foreground "#0000ff")
   ;;'(font-lock-function-name-face :foreground "#0000ff")
