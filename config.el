@@ -686,8 +686,8 @@
   '(marginalia-number          :foreground "#ba55d3")
   '(marginalia-size            :foreground "#ba55d3") 
 
-  ;; doxygen keywoards
-  '(font-lock-doc-markup-face :foreground "#ff0000"))
+  ;; doxygen keywords
+  '(font-lock-doc-markup-face :foreground "#ff0000")
   ;;'(font-lock-doc-face :foreground "#ba55d3"))
   ;; other misc
   ;;'(doom-dashboard-footer :foreground "#0000ff")
@@ -703,7 +703,6 @@
   ;; doom splash screen
   '(+dashboard-menu-title :foreground "#0000ff")
   '(+dashboard-menu-desc :foreground "#a020f0"))
-
 
 
 ;; make the background of leuven a little more dim
